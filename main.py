@@ -178,7 +178,20 @@ class NdfApp(App):
         self.expenses = self.manager.get_screen('expenses')
 
         self.load_expenses()
+        if not self.is_configured():
+            self.manager.transition.direction = 'down'
+            self.manager.current = 'settings'
         return self.root
+
+    def is_configured(self):
+        """
+            Check if the application is fully configured
+        """
+        for key in ('server', 'login', 'password'):
+            if not self.settings.get('settings', key):
+                return False
+        return True
+
 
     def load_settings(self):
         """
@@ -369,8 +382,6 @@ class NdfApp(App):
         Logger.error("Ndf : %s" % resp)
         rest_req = RestRequest(req, resp)
         if rest_req.code == 404:
-            Logger.debug("Get a 404")
-            Logger.debug("%s"%expense)
             # This expense is not know anymore
             if expense['todo'] == 'delete':
                 self.pool.remove(expense)
@@ -442,6 +453,7 @@ vos données"
             self.expenses.data = self.pool
 
     def store_expense(self, screen_name, expense):
+        Logger.debug("Storing an expense : %s" % expense)
         screen = self.manager.get_screen(screen_name)
 
         # TODO: add validation
@@ -457,7 +469,12 @@ vos données"
         if self.manager.has_screen(name):
             self.manager.remove_widget(self.manager.get_screen(name))
 
-        view = KmEditFormScreen(
+        if expense.has_key('start'):
+            form = KmEditFormScreen
+        else:
+            form = CommonEditFormScreen
+
+        view = form(
                 name=name,
                 expense=expense)
         self.manager.add_widget(view)
@@ -470,25 +487,7 @@ vos données"
         self.settings.set('main', 'expenses', self.pool.stored_version())
 
 
-class AddScreen(Screen):
-    ndf_type = StringProperty('Type de frais')
-
-    def on_ndf_type(self, screen, value):
-        if value == 'km':
-            self.manager.transition.direction = 'left'
-            self.manager.current = "kmform"
-        elif value == 'tel':
-            pass
-        else:
-            pass
-        # Reset the spinner to the default value
-        self.ndf_type = "Type de frais"
-
-    def edit_expense(self, index):
-        pass
-
-
-class KmAddFormScreen(Screen):
+class ExpenseFormScreen(Screen):
     expense = DictProperty({})
     def set_value(self, key, value, *args):
         Logger.debug(u"Ndf : Setting a value for {0} : {1}".format(key, value))
@@ -536,10 +535,19 @@ class KmAddFormScreen(Screen):
         return write_locale_date(date)
 
 
-class KmEditFormScreen(KmAddFormScreen):
+class KmAddFormScreen(ExpenseFormScreen):
+    pass
+
+class KmEditFormScreen(ExpenseFormScreen):
     """
         Form used to edit km expenses
     """
+    pass
+
+class CommonAddFormScreen(ExpenseFormScreen):
+    pass
+
+class CommonEditFormScreen(ExpenseFormScreen):
     pass
 
 

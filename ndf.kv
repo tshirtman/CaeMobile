@@ -49,7 +49,10 @@ BoxLayout:
             name: 'settings'
 
         KmAddFormScreen:
-            name: 'kmform'
+            name: 'kmaddform'
+
+        CommonAddFormScreen:
+            name: 'commonaddform'
 
 
 <MenuButton@Button>:
@@ -163,8 +166,7 @@ BoxLayout:
             Widget:
 
 
-<AddScreen>:
-    ndf_type: spinner_type.text
+<AddScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
         Button:
@@ -178,17 +180,27 @@ BoxLayout:
             size_hint_y: None
             height: small_button_height
 
-        Spinner:
+        Button:
             size_hint_y: None
-            height: small_button_height
-            id: spinner_type
-            text: root.ndf_type
-            values: 'km', 'tel', 'autre'
+            height: '60dp'
+            text: 'Frais divers'
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'commonaddform'
+        Widget:
+            size_hint_y: None
+
+        Button:
+            size_hint_y: None
+            height: '60dp'
+            text: 'Frais kilométriques'
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'kmaddform'
 
         Widget:
 
-
-<KmAddFormScreen>:
+<KmEditFormScreen>:
 
     BoxLayout:
         orientation: 'vertical'
@@ -320,6 +332,360 @@ BoxLayout:
                     root.manager.current = 'expenses'
 
             Widget:
+
+
+<KmAddFormScreen>:
+
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'expenses'
+
+        GridLayout:
+            cols: 2
+            Widget:
+            Widget:
+            Label:
+                text: "Catégorie de frais"
+                size_hint_y: None
+                height: small_button_height
+            BoxLayout:
+                orientation: 'vertical'
+                ToggleButton:
+                    text: u"Frais direct de fonctionnement"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "1" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"1")
+                ToggleButton:
+                    text: "Frais liés à l'activité auprès de vos clients"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "2" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"2")
+            Label:
+                text: "Type de frais"
+                size_hint_y: None
+                height: small_button_height
+            Spinner:
+                text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
+                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes')] or []
+                size_hint_y: None
+                height: small_button_height
+                on_text:
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+            Label:
+                text: "Date (jj-mm-AAAA)"
+            TextInput:
+                id: date
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.get_date()
+                on_text_validate:
+                    root.set_value('date', args[0].text)
+                    start.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+            Label:
+                text: "Point de départ"
+            TextInput:
+                id: start
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('start') or ""
+                on_text_validate:
+                    root.set_value('start', args[0].text)
+                    end.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Point d'arrivée"
+            TextInput:
+                id: end
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('end') or ""
+                on_text_validate:
+                    root.set_value('end', args[0].text)
+                    ht.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Nombre de kilomètres"
+            TextInput:
+                id: ht
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('km') or ""
+                on_text_validate:
+                    root.set_value('km', args[0].text)
+                    description.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Description"
+            TextInput:
+                id: description
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('description') or ""
+                on_text_validate:
+                    root.set_value('description', args[0].text)
+                    valid.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+            Widget:
+            Widget:
+            Button:
+                id: valid
+                size_hint_y: None
+                height: small_button_height
+                text: "Enregistrer"
+                on_press:
+                    app.store_expense(root.name, root.expense)
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'expenses'
+
+            Widget:
+
+<CommonAddFormScreen>:
+
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'expenses'
+
+        GridLayout:
+            cols: 2
+            Widget:
+            Widget:
+            Label:
+                text: "Catégorie de frais"
+                size_hint_y: None
+                height: small_button_height
+            BoxLayout:
+                orientation: 'vertical'
+                ToggleButton:
+                    text: u"Frais direct de fonctionnement"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "1" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"1")
+                ToggleButton:
+                    text: "Frais liés à l'activité auprès de vos clients"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "2" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"2")
+            Label:
+                text: "Type de frais"
+                size_hint_y: None
+                height: small_button_height
+            Spinner:
+                text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
+                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
+                size_hint_y: None
+                height: small_button_height
+                on_text:
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+            Label:
+                text: "Date (jj-mm-AAAA)"
+            TextInput:
+                id: date
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.get_date()
+                on_text_validate:
+                    root.set_value('date', args[0].text)
+                    description.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Description"
+            TextInput:
+                id: description
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('description') or ""
+                on_text_validate:
+                    root.set_value('description', args[0].text)
+                    ht.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+            Label:
+                text: "Montant HT"
+            TextInput:
+                id: ht
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('ht') or ""
+                on_text_validate:
+                    root.set_value('ht', args[0].text)
+                    tva.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Montant de la TVA"
+            TextInput:
+                id: tva
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('tva') or ""
+                on_text_validate:
+                    root.set_value('tva', args[0].text)
+                    valid.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Widget:
+            Widget:
+            Button:
+                id: valid
+                size_hint_y: None
+                height: small_button_height
+                text: "Enregistrer"
+                on_press:
+                    app.store_expense(root.name, root.expense)
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'expenses'
+
+            Widget:
+
+<CommonEditFormScreen>:
+
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'expenses'
+
+        Button:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Supprimer'
+            on_press:
+                app.delete_expense(root.expense)
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'expenses'
+
+        GridLayout:
+            cols: 2
+            Widget:
+            Widget:
+            Label:
+                text: "Catégorie de frais"
+                size_hint_y: None
+                height: small_button_height
+            BoxLayout:
+                orientation: 'vertical'
+                ToggleButton:
+                    text: u"Frais direct de fonctionnement"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "1" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"1")
+                ToggleButton:
+                    text: "Frais liés à l'activité auprès de vos clients"
+                    group: "category"
+                    height: small_button_height
+                    state: root.expense and root.expense.get('category') == "2" and 'down' or 'normal'
+                    on_release:
+                        root.set_value("category", u"2")
+            Label:
+                text: "Type de frais"
+                size_hint_y: None
+                height: small_button_height
+            Spinner:
+                text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
+                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
+                size_hint_y: None
+                height: small_button_height
+                on_text:
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+            Label:
+                text: "Date (jj-mm-AAAA)"
+            TextInput:
+                id: date
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.get_date()
+                on_text_validate:
+                    root.set_value('date', args[0].text)
+                    description.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Description"
+            TextInput:
+                id: description
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('description') or ""
+                on_text_validate:
+                    root.set_value('description', args[0].text)
+                    ht.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+            Label:
+                text: "Montant HT"
+            TextInput:
+                id: ht
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('ht') or ""
+                on_text_validate:
+                    root.set_value('ht', args[0].text)
+                    tva.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Label:
+                text: "Montant de la TVA"
+            TextInput:
+                id: tva
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.expense and root.expense.get('tva') or ""
+                on_text_validate:
+                    root.set_value('tva', args[0].text)
+                    valid.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+            Widget:
+            Widget:
+            Button:
+                id: valid
+                size_hint_y: None
+                height: small_button_height
+                text: "Enregistrer"
+                on_press:
+                    app.store_expense(root.name, root.expense)
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'expenses'
+
+            Widget:
+
 
 <ExpenseListScreen@Screen>:
     BoxLayout:
