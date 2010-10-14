@@ -89,7 +89,8 @@ class ExpensePool(list):
         Logger.debug("Ndf : Updating an expense %s" % expense_dict)
         index, expense = self.get_expense_by_local_id(expense_dict['local_id'])
         expense.update(expense_dict)
-        expense['todo'] = 'update'
+        if expense.has_key('id'):
+            expense['todo'] = 'update'
         expense['synced'] = False
         return expense
 
@@ -339,17 +340,41 @@ class NdfApp(App):
             self.pool_updated()
             Logger.info("Ndf : %s" % self.pool)
         else:
-            self.sync_error(req, resp)
+            self.sync_error(expense, req, resp)
 
-    def sync_error(self, req, resp):
+    def sync_error(self, expense, req, resp):
         """
             Error while synchronizing
         """
         Logger.error("Ndf : Synchronization error")
         Logger.error("Ndf : error code : %s" % req.resp_status)
         Logger.error("Ndf : %s" % resp)
-        self.dialog("Erreur de synchronisation",
-    u"Une erreur est survenue lors de la synchronisation de vos données")
+        rest_req = RestRequest(req, resp)
+        if rest_req.code == 404:
+            Logger.debug("Get a 404")
+            Logger.debug("%s"%expense)
+            # This expense is not know anymore
+            if expense['todo'] == 'delete':
+                self.pool.remove(expense)
+                self.pool_updated()
+            else:
+                # This expense is not know on the server side, we pop its id to
+                # be able to simply add it next time
+                expense.pop('id')
+                expense['todo'] = 'add'
+                self.sync_expense(expense)
+                return
+        elif rest_req.status == 'error':
+            errors = rest_req.resp
+            msg = u"Une erreur est survenue lors de la synchronisation de \
+vos données"
+            for key, value in rest_req.errors.items():
+                msg += u'\n'
+                msg += u"{key} : {value}".format(key=key, value=value)
+        else:
+            msg = u"Une erreur inconnue est survenue lors de la \
+                    synchronisation de vos données : \n %s" % resp
+        self.dialog("Erreur de synchronisation", msg)
 
     def pool_updated(self):
         """
