@@ -146,13 +146,16 @@ class RestRequest(object):
         self.request = request
         self.resp = resp
         self.code = self.request.resp_status
-        self.success = hasattr(self.resp, 'get') and \
-                self.resp.get('status') == 'success'
         if hasattr(self.resp, 'get'):
+            self.status = self.resp.get('status')
             self.result = self.resp.get('result', {})
+            self.errors = self.resp.get('errors', {})
         else:
+            self.status = None
             self.result = {}
+            self.errors = {}
 
+        self.success = self.status == 'success'
 
 
 class NdfApp(App):
@@ -259,19 +262,21 @@ class NdfApp(App):
         self.property('settings').dispatch(self)
         self.check_auth()
 
-    def fetch_options(self):
+    def fetch_options(self, silent=False):
         """
             Fetch options for expense configuration
         """
         path = "expenseoptions"
         conn = self.get_connection()
+        success = partial(self.fetch_options_success, silent)
+        error = partial(self.fetch_options_error, silent)
         conn.request(
                 path,
                 {},
-                on_success=self.fetch_options_success,
-                on_error=self.fetch_options_error)
+                on_success=success,
+                on_error=error)
 
-    def fetch_options_success(self, request, resp):
+    def fetch_options_success(self, silent, request, resp):
         """
             Fetch options success handler
         """
@@ -280,17 +285,19 @@ class NdfApp(App):
         if rest_req.success:
             self.store_options(rest_req.result)
         else:
-            self.fetch_options_error(request, resp)
-        self.dialog(
+            self.fetch_options_error(silent, request, resp)
+        if not silent:
+            self.dialog(
                 title=u"Configuration réussie",
                 text=u"Votre application a bien été configurée")
 
-    def fetch_options_error(self, request, resp):
+    def fetch_options_error(self, silent, request, resp):
         """
             Error while fetching options
         """
         Logger.info("Nd : Get back : %s" % resp)
-        self.dialog(
+        if not silent:
+            self.dialog(
                 title=u"Erreur à la configuration",
                 text=u"Une erreur inconnue a été rencontrée lors de la " \
                         "configuration de l'application.")
@@ -313,16 +320,27 @@ class NdfApp(App):
         path = "expenses"
         conn = self.get_connection()
 
+        self.fetch_options(silent=True)
+
         for expense in self.pool.tosync():
-            Logger.debug("Ndf : We'd like to sync %s" % expense)
-            path, method = get_action_path_and_method(expense)
-            success = partial(self.sync_success, expense)
-            conn.request(
-                    path,
-                    expense,
-                    on_success=success,
-                    on_error=self.fetch_options_error,
-                    method=method)
+            self.sync_expense(expense, conn=conn)
+
+    def sync_expense(self, expense, conn=None):
+        """
+            Sync the given expense
+        """
+        if conn is None:
+            conn = self.get_connection()
+        Logger.debug("Ndf : We'd like to sync %s" % expense)
+        path, method = get_action_path_and_method(expense)
+        success = partial(self.sync_success, expense)
+        error = partial(self.sync_error, expense)
+        conn.request(
+                path,
+                expense,
+                on_success=success,
+                on_error=error,
+                method=method)
 
     def sync_success(self, expense, req, resp):
         """
