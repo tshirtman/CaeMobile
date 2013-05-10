@@ -1,0 +1,73 @@
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+FloatLayout:
+    ScreenManager:
+        transition: SlideTransition()
+        MenuScreen:
+            name: 'menu'
+
+        AddScreen:
+            name: 'add'
+
+        BacklogScreen:
+            name: 'backlog'
+
+
+<MenuScreen>:
+    BoxLayout:
+        size_hint: .9, .9
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        orientation: 'vertical'
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0.7, 0.2, 0.35, 1.0
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            text: 'Notes de frais'
+
+        Widget:
+            size_hint_y: None
+            height: sp(20)
+        Button:
+            text: 'Ajouter'
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'add'
+
+        Widget:
+            size_hint_y: None
+            height: sp(20)
+        Button:
+            text: 'Voir'
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'backlog'
+
+<AddScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: sp(20)
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+        Widget:
+
+<BacklogScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: sp(20)
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+
+        Widget:
