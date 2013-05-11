@@ -58,6 +58,13 @@ FloatLayout:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
         Widget:
+            size_hint_y: None
+            height: sp(20)
+
+        Spinner:
+            text: 'type'
+            values: 'km', 'tel', 'autre'
+            on_text: root.type_choosen(args[1])
 
 <BacklogScreen>:
     BoxLayout:
@@ -70,4 +77,5 @@ FloatLayout:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
 
-        Widget:
+        ListView:
+            adapter: app.datalist_adapter
