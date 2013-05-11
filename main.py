@@ -6,6 +6,10 @@ class NdfApp(App):
     pass
 
 
+class FirstScreen(Screen):
+    pass
+
+
 class MenuScreen(Screen):
     pass
 

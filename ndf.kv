@@ -3,6 +3,9 @@
 FloatLayout:
     ScreenManager:
         transition: SlideTransition()
+        FirstScreen:
+            name: 'firstscreen'
+
         MenuScreen:
             name: 'menu'
 
@@ -12,6 +15,30 @@ FloatLayout:
         BacklogScreen:
             name: 'backlog'
 
+<FirstScreen>:
+    BoxLayout:
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        orientation: 'vertical'
+        size_hint: .9, None
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0.7, 0.2, 0.35, 1.0
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            text: "Premiere connexion"
+            size_hint_y: None
+            height: sp(30)
+
+        TextInput:
+            size_hint_y: None
+            height: sp(30)
+            multiline: False
+            on_text_validate:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'menu'
 
 <MenuScreen>:
     BoxLayout:
