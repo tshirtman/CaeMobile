@@ -36,7 +36,10 @@ class MenuScreen(Screen):
 
 
 class AddScreen(Screen):
-    pass
+    ndf_type = StringProperty('')
+
+    def on_ndf_type(self, *args):
+        print 'type changed: %s' % str(args)
 
 
 class BacklogScreen(Screen):

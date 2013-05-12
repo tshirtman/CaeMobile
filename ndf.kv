@@ -48,6 +48,7 @@ FloatLayout:
                 root.manager.current = 'backlog'
 
 <AddScreen>:
+    ndf_type: spinner_type.text
     BoxLayout:
         orientation: 'vertical'
         Button:
@@ -62,9 +63,9 @@ FloatLayout:
             height: sp(20)
 
         Spinner:
+            id: spinner_type
             text: 'type'
             values: 'km', 'tel', 'autre'
-            on_text: root.type_choosen(args[1])
 
 <BacklogScreen>:
     BoxLayout:
