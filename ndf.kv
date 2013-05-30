@@ -12,6 +12,9 @@ FloatLayout:
         BacklogScreen:
             name: 'backlog'
 
+        SettingsScreen:
+            name: 'settings'
+
 
 <MenuScreen>:
     BoxLayout:
@@ -46,6 +49,49 @@ FloatLayout:
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'backlog'
+        Widget:
+            size_hint_y: None
+            height: sp(20)
+        Button:
+            text: 'Settings'
+            on_press:
+                root.manager.transition.direction = 'down'
+                root.manager.current = 'settings'
+
+<SettingsScreen@Screen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: sp(20)
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'menu'
+        GridLayout:
+            size_hint: 0.9, 0.9
+            center: root.center
+            cols: 2
+
+            Label:
+                text: 'login'
+            TextInput:
+                text: app.settings.login
+                on_text: app.settings.login = args[2]
+
+            Label:
+                text: 'password'
+            TextInput:
+                text: app.settings.password
+                on_text: app.settings.password = args[2]
+                password: True
+
+            Label:
+                text: 'sync on wifi only'
+            Switch:
+                value: app.settings.sync_wifi
+                on_value: app.settings.sync_wifi = args[2]
+
 
 <AddScreen>:
     ndf_type: spinner_type.text
@@ -63,9 +109,13 @@ FloatLayout:
             height: sp(20)
 
         Spinner:
+            size_hint_y: None
+            height: sp(50)
             id: spinner_type
             text: 'type'
             values: 'km', 'tel', 'autre'
+
+        Widget:
 
 <BacklogScreen>:
     BoxLayout:

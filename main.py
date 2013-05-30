@@ -2,13 +2,28 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.listview import ListItemButton
 from kivy.adapters.simplelistadapter import SimpleListAdapter
-from kivy.properties import ObjectProperty, ListProperty, StringProperty
+from kivy.properties import ObjectProperty, ListProperty, StringProperty, AliasProperty
 from kivy.metrics import sp
 
+from ConfigParser import SafeConfigParser
+
+SETTINGSFILE = '.default_config.ini'
+DEFAULTSETTINGSFILE = 'config.ini'
+
+SETTINGS = SafeConfigParser()
+SETTINGS.read(DEFAULTSETTINGSFILE)
+SETTINGS.read(SETTINGSFILE)
 
 class NdfApp(App):
     datalist_adapter = ObjectProperty(None)
     datalist = ListProperty()
+    def _get(item):
+        SETTINGS.get('settings', item)
+
+    def _set(self, item, value):
+        SETTINGS.set('settings', item, value)
+
+    settings = AliasProperty(_get, _set)
 
     def __init__(self, **kwargs):
         super (NdfApp, self).__init__(**kwargs)
@@ -17,6 +32,7 @@ class NdfApp(App):
                 cls=ListItemButton,
                 args_converter=self.data_converter,
                 )
+
 
     def build(self):
         return super(NdfApp, self).build()
