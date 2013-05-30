@@ -1,7 +1,32 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
+#:set small_button_height '40sp'
 
-FloatLayout:
+BoxLayout:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: None
+        height: '30sp'
+
+        top: self.parent.top
+
+        Button:
+            Image:
+                height: .9 * self.parent.height
+                center: self.parent.center
+                source: 'data/icon.png'
+        Button:
+            Image:
+                height: .9 * self.parent.height
+                center: self.parent.center
+                source: 'data/icon.png'
+        Button:
+            Image:
+                height: .9 * self.parent.height
+                center: self.parent.center
+                source: 'data/icon.png'
+
     ScreenManager:
+        opacity: 0.9
         transition: SlideTransition()
         FirstScreen:
             name: 'firstscreen'
@@ -15,30 +40,9 @@ FloatLayout:
         BacklogScreen:
             name: 'backlog'
 
-<FirstScreen>:
-    BoxLayout:
-        pos_hint: {'center_x': .5, 'center_y': .5}
-        orientation: 'vertical'
-        size_hint: .9, None
-        Label:
-            canvas.before:
-                Color:
-                    rgba: 0.7, 0.2, 0.35, 1.0
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+        SettingsScreen:
+            name: 'settings'
 
-            text: "Premiere connexion"
-            size_hint_y: None
-            height: sp(30)
-
-        TextInput:
-            size_hint_y: None
-            height: sp(30)
-            multiline: False
-            on_text_validate:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'menu'
 
 <MenuScreen>:
     BoxLayout:
@@ -58,7 +62,7 @@ FloatLayout:
 
         Widget:
             size_hint_y: None
-            height: sp(20)
+            height: small_button_height
         Button:
             text: 'Ajouter'
             on_press:
@@ -67,23 +71,90 @@ FloatLayout:
 
         Widget:
             size_hint_y: None
-            height: sp(20)
+            height: small_button_height
         Button:
             text: 'Voir'
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'backlog'
+        Widget:
+            size_hint_y: None
+            height: small_button_height
+        Button:
+            text: 'Settings'
+            on_press:
+                root.manager.transition.direction = 'down'
+                root.manager.current = 'settings'
 
-<AddScreen>:
+<SettingsScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
         Button:
             size_hint_y: None
-            height: sp(20)
+            height: small_button_height
+            text: 'Retour'
+            on_press:
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'menu'
+
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'login'
+                size_hint_y: None
+                height: small_button_height
+            TextInput:
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: app.settings and app.settings.get('settings', 'login') or ''
+                on_text: app.settings.set('settings', 'login', args[1])
+
+            Label:
+                size_hint_y: None
+                height: small_button_height
+                text: 'password'
+            TextInput:
+                size_hint_y: None
+                height: small_button_height
+                multiline: False
+                text: app.settings and app.settings.get('settings', 'password') or ''
+                on_text: app.settings.set('settings', 'password', args[1])
+                password: True
+
+            Label:
+                size_hint_y: None
+                height: small_button_height
+                text: 'sync on wifi only'
+            Switch:
+                size_hint_y: None
+                height: small_button_height
+                active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
+                on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
+
+
+<AddScreen>:
+    ndf_type: spinner_type.text
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: small_button_height
             text: 'Retour'
             on_press:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
+        Widget:
+            size_hint_y: None
+            height: small_button_height
+
+        Spinner:
+            size_hint_y: None
+            height: small_button_height
+            id: spinner_type
+            text: 'type'
+            values: 'km', 'tel', 'autre'
+
         Widget:
 
 <BacklogScreen>:
@@ -91,10 +162,11 @@ FloatLayout:
         orientation: 'vertical'
         Button:
             size_hint_y: None
-            height: sp(20)
+            height: small_button_height
             text: 'Retour'
             on_press:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
 
-        Widget:
+        ListView:
+            adapter: app.datalist_adapter
