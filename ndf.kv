@@ -76,21 +76,21 @@ FloatLayout:
             Label:
                 text: 'login'
             TextInput:
-                text: app.settings.login
-                on_text: app.settings.login = args[2]
+                text: app.settings and app.settings.get('settings', 'login') or ''
+                on_text: app.settings.set('settings', 'login', args[1])
 
             Label:
                 text: 'password'
             TextInput:
-                text: app.settings.password
-                on_text: app.settings.password = args[2]
+                text: app.settings and app.settings.get('settings', 'password') or ''
+                on_text: app.settings.set('settings', 'password', args[1])
                 password: True
 
             Label:
                 text: 'sync on wifi only'
             Switch:
-                value: app.settings.sync_wifi
-                on_value: app.settings.sync_wifi = args[2]
+                active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
+                on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
 
 
 <AddScreen>:
