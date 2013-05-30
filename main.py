@@ -1,6 +1,8 @@
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 
+__version__ = '0.01'
+
 
 class NdfApp(App):
     pass
