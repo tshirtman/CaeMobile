@@ -58,7 +58,7 @@ class NdfApp(App):
         return {
             'text': element['title'],
             'size_hint_y': None,
-            'height': sp(30)
+            'height': '30sp'
             }
 
 class MenuScreen(Screen):
