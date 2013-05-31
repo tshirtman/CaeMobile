@@ -9,21 +9,15 @@ BoxLayout:
 
         top: self.parent.top
 
-        Button:
-            Image:
-                height: .9 * self.parent.height
-                center: self.parent.center
-                source: 'data/icon.png'
-        Button:
-            Image:
-                height: .9 * self.parent.height
-                center: self.parent.center
-                source: 'data/icon.png'
-        Button:
-            Image:
-                height: .9 * self.parent.height
-                center: self.parent.center
-                source: 'data/icon.png'
+        MenuButton:
+            source: 'data/icon.png'
+            text: 'test'
+
+        MenuButton:
+            source: 'data/icon.png'
+
+        MenuButton:
+            source: 'data/icon.png'
 
     ScreenManager:
         opacity: 0.9
@@ -41,6 +35,31 @@ BoxLayout:
         SettingsScreen:
             name: 'settings'
 
+
+<MenuButton@Button>:
+    source: ''
+    text: ''
+    color: 0, 0, 0, 0
+
+    BoxLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        height: .9 * root.height
+        center_y: root.center_y
+        x: root.x + sp(2)
+
+        Image:
+            source: root.source
+            size_hint_x: None
+            width: self.texture_size[0]
+
+        Label:
+            text: root.text
+            size_hint_x: None
+            width: self.texture_size[0]
 
 <MenuScreen>:
     BoxLayout:
