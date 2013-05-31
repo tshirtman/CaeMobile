@@ -92,7 +92,7 @@ BoxLayout:
         Button:
             text: 'Voir'
             on_press:
-                root.manager.transition.direction = 'left'
+                root.manager.transition.direction = 'right'
                 root.manager.current = 'backlog'
         Widget:
             size_hint_y: None
@@ -182,7 +182,7 @@ BoxLayout:
             height: small_button_height
             text: 'Retour'
             on_press:
-                root.manager.transition.direction = 'right'
+                root.manager.transition.direction = 'left'
                 root.manager.current = 'menu'
 
         ListView:
