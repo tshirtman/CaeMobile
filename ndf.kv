@@ -116,6 +116,8 @@ BoxLayout:
 
         GridLayout:
             cols: 2
+            Widget:
+            Widget:
             Label:
                 text: 'login'
                 size_hint_y: None
@@ -153,6 +155,8 @@ BoxLayout:
                 height: small_button_height
                 active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
                 on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
+            Widget:
+            Widget:
 
 
 <AddScreen>:
