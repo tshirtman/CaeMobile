@@ -10,8 +10,10 @@ BoxLayout:
         top: self.parent.top
 
         MenuButton:
-            source: 'data/icon.png'
-            text: 'test'
+            source: 'data/sync.png'
+            # XXX find a nice way to update this in UI
+            text: 'sync (%s)' % (app.settings and len(app.settings.items('tosync')) or 0)
+            on_press: app.sync(*args)
 
         MenuButton:
             source: 'data/icon.png'
@@ -119,10 +121,23 @@ BoxLayout:
             Widget:
             Widget:
             Label:
+                text: 'Serveur'
+                size_hint_y: None
+                height: small_button_height
+            TextInput:
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: app.settings and app.settings.get('settings', 'server') or ''
+                on_text_validate:
+                    app.settings.set('settings', 'server', args[0].text)
+                    login.focus = True
+            Label:
                 text: 'login'
                 size_hint_y: None
                 height: small_button_height
             TextInput:
+                id: login
                 multiline: False
                 size_hint_y: None
                 height: small_button_height
@@ -196,3 +211,40 @@ BoxLayout:
 
         ListView:
             adapter: app.datalist_adapter
+
+<SyncPopup>:
+    size_hint: .9, .5
+    title: 'syncing'
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: '%s/%s' % (root.progress, len(app.settings.items('tosync')))
+
+        Widget:
+            size_hint_y: None
+            height: '30sp'
+            canvas:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+                Color:
+                    rgba: .5, .5, .5, 1
+                Rectangle:
+                    pos: self.x + 4, self.y + 4
+                    size:
+                        (
+                        (self.width - 8) * (root.progress / len(app.settings.items('tosync'))),
+                        self.height - 8
+                        )
+        Button:
+            text: 'errors: %s' % len(root.errors)
+            # XXX do some error display
+
+        Button:
+            activated: root.done
+            text: 'Ok'
