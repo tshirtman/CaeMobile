@@ -40,7 +40,7 @@ class NdfApp(App):
 
     def build(self):
         settings = SafeConfigParser()
-        print '!' * 80 + '\n%s: loaded' % settings.read((
+        print '%s: loaded' % settings.read((
             DEFAULTSETTINGSFILE,
             SETTINGSFILE))
 
