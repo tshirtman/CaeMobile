@@ -1,3 +1,4 @@
+# coding: utf-8
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.listview import ListItemButton
