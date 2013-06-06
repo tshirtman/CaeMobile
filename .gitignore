@@ -1,0 +1,8 @@
+*.swo
+*.swp
+*.un~
+config.ini
+.buildozer
+bin/
+*.pyc
+*.pyo
