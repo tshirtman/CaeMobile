@@ -10,9 +10,16 @@ from kivy.properties import (
 
 from kivy.network.urlrequest import UrlRequest
 from ConfigParser import SafeConfigParser
+from functools import partial
+from json import JSONDecoder, JSONEncoder
+
+json_encode = JSONEncoder().encode
+json_decode = JSONDecoder().raw_decode
+
 
 DEFAULTSETTINGSFILE= '.default_config.ini'
 SETTINGSFILE = 'config.ini'
+API_PATH = '/api/v1'
 
 
 __version__ = '0.01'
@@ -41,6 +48,7 @@ class NdfApp(App):
                 cls=ListItemButton,
                 args_converter=self.data_converter,
                 )
+        self._cookie = None
 
 
     def build(self):
@@ -55,17 +63,76 @@ class NdfApp(App):
         print self.datalist_adapter
         return super(NdfApp, self).build()
 
-    def send(self, note):
+    def auth_redirect(self, resp, *args, **kwargs):
+        print "got auth!", resp
+        self._cookie = resp.headers.get('set-cookie')
+        self.request(**kwargs)
+
+    def popup_auth_failure(self, *args):
+        print "failure, hmm"
+        p = Popup(
+            title="Erreur d'authentification",
+            content=Label(text=u'Vérifiez la configuration')
+            )
+
+    def request(self, path, on_success=None, on_failure=None, **kwargs):
+        base_url = self.settings.get('settings', 'server') + API_PATH
+
+        if not self._cookie:
+            # get a cookie then call again
+            print "not logged"
+            body = json_encode({
+                'login': self.settings.get('settings', 'login'),
+                'password': self.settings.get('settings', 'password'),
+                'submit': '', # reserved for future use
+                'X-Requested-With': 'XMLHttpRequest',
+                })
+
+            self.requests.append(
+                    UrlRequest(
+                        base_url + '/login',
+                        method='POST',
+                        req_body=body,
+                        on_success=partial(
+                            self.auth_redirect,
+                            path,
+                            on_success=on_success,
+                            on_failure=on_failure,
+                            **kwargs),
+                        on_failure=self.popup_auth_failure))
+
+        else:
+            self.requests.append(
+                    UrlRequest(
+                        base_url + path,
+                        req_body=body,
+                        on_success=on_success,
+                        on_failure=on_failure,
+                        )
+                    )
+
+    def get(self, on_success=None, on_failure=None, **kwargs):
+        if kwargs:
+            # TODO we want to use kwargs to filter
+            pass
+
+        else:
+            self.request('path')
+
+    def send(self, expense):
+        ''' Try to send an expense to the server, if the request success,
+            the expense should be removed from the 'tosync' expenses, else, the
+            error should be displayed.
+        '''
         body = {
         }
 
-        self.requests.append(UrlRequest(
-            self.settings.get('settings', 'server'),
+        self.request(
+            self.settings.get('settings', 'server') +  API_PATH,
             on_success=self.send_success,
             on_failure=self.send_failure,
             req_body=body
             )
-        )
 
     def send_success(self, *args):
         ''' Take note that the expense was accepted by the server.
