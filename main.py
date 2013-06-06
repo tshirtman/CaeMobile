@@ -19,12 +19,16 @@ __version__ = '0.01'
 
 
 class SyncPopup(Popup):
+    ''' This popup display the current syncing state in the app
+    '''
     progress = NumericProperty(0)
     done = BooleanProperty(False)
     errors = ListProperty([])
 
 
 class NdfApp(App):
+    ''' #TODO
+    '''
     datalist_adapter = ObjectProperty(None)
     datalist = ListProperty([])
     settings = ObjectProperty()
@@ -64,35 +68,49 @@ class NdfApp(App):
         )
 
     def send_success(self, *args):
+        ''' Take note that the expense was accepted by the server.
+        '''
         self.settings.remove_option('tosync', n[0])
         self.popup.progress += 1
 
     def send_failure(self, *args):
+        ''' Indicate a failure to the user, keep the expense in record.
+        '''
         self.popup.progress += 1
         self.popup.errors.append('error treating %s: %s' % (n[0], e))
 
     def sync(self, *args):
-        notes = self.settings.items('tosync')
+        ''' Send requests to sync all the pending expenses
+        '''
+        expenses = self.settings.items('tosync')
         self.popup = SyncPopup()
         self.popup.open()
 
-        for n in notes:
-            self.send(n)
+        for e in expenses:
+            self.send(e)
 
     def on_pause(self, *args):
+        ''' Implement on_pause to save data before going to sleep on android.
+        '''
         with open(SETTINGSFILE, 'w') as f:
             self.settings.write(f)
         return True
 
     def on_stop(self, *args):
+        ''' Called when the application is stopped, save data.
+        '''
         with open(SETTINGSFILE, 'w') as f:
             self.settings.write(f)
         return True
 
     def on_resume(self, *args):
+        ''' Allow resuming app
+        '''
         return True
 
     def on_datalist(self, *args):
+        '''
+        '''
         self.datalist_adapter.data = self.datalist[:]
 
     def data_converter(self, row_index, element):
