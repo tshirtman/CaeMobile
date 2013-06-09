@@ -1,23 +1,28 @@
 # coding: utf-8
+
+from ConfigParser import SafeConfigParser
+from functools import partial
+from json import JSONDecoder, JSONEncoder
+
 from kivy.app import App
+from kivy.logger import Logger
 from kivy.uix.screenmanager import Screen
+from kivy.uix.label import Label
 from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
 from kivy.adapters.simplelistadapter import SimpleListAdapter
 from kivy.properties import (
-        ObjectProperty, ListProperty, StringProperty, AliasProperty,
+        ObjectProperty, ListProperty, StringProperty,
         BooleanProperty, NumericProperty)
 
 from kivy.network.urlrequest import UrlRequest
-from ConfigParser import SafeConfigParser
-from functools import partial
-from json import JSONDecoder, JSONEncoder
 
 json_encode = JSONEncoder().encode
 json_decode = JSONDecoder().raw_decode
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
 SETTINGSFILE = 'config.ini'
+SETTINGS_FILES = DEFAULTSETTINGSFILE, SETTINGSFILE
 API_PATH = '/api/v1'
 
 __version__ = '0.01'
@@ -50,55 +55,33 @@ class NdfApp(App):
 
     def build(self):
         settings = SafeConfigParser()
-        print '%s: loaded' % settings.read((
-            DEFAULTSETTINGSFILE,
-            SETTINGSFILE))
+        settings_file = settings.read(SETTINGS_FILES)
+        Logger.info("Ndf: %s loaded", settings_file)
 
         # need to load config *before* assigning to self.settings
         self.settings = settings
 
-        print self.datalist_adapter
         return super(NdfApp, self).build()
 
     def auth_redirect(self, resp, *args, **kwargs):
-        print "got auth!", resp
+        Logger.info("Ndf: Must authenticate: %s", resp)
         self._cookie = resp.headers.get('set-cookie')
         self.request(**kwargs)
 
     def popup_auth_failure(self, *args):
-        print "failure, hmm"
+        Logger.warning("Ndf: Erreur d'authentification")
         p = Popup(
             title="Erreur d'authentification",
             content=Label(text=u'Vérifiez la configuration')
             )
+        Logger.debug("Ndf: popup for auth error (%s)", p)
 
     def request(self, path, on_success=None, on_failure=None, **kwargs):
         base_url = self.settings.get('settings', 'server') + API_PATH
 
-        if not self._cookie:
-            # get a cookie then call again
-            print "not logged"
-            body = json_encode({
-                'login': self.settings.get('settings', 'login'),
-                'password': self.settings.get('settings', 'password'),
-                'submit': '', # reserved for future use
-                'X-Requested-With': 'XMLHttpRequest',
-                })
 
-            self.requests.append(
-                    UrlRequest(
-                        base_url + '/login',
-                        method='POST',
-                        req_body=body,
-                        on_success=partial(
-                            self.auth_redirect,
-                            path,
-                            on_success=on_success,
-                            on_failure=on_failure,
-                            **kwargs),
-                        on_failure=self.popup_auth_failure))
-
-        else:
+        if self._cookie:
+            body = None  # FIXME
             self.requests.append(
                     UrlRequest(
                         base_url + path,
@@ -107,6 +90,30 @@ class NdfApp(App):
                         on_failure=on_failure,
                         )
                     )
+            return
+
+        # get a cookie then call again
+        Logger("Ndf: not logged in, authenticating")
+        body = json_encode({
+            'login': self.settings.get('settings', 'login'),
+            'password': self.settings.get('settings', 'password'),
+            'submit': '', # reserved for future use
+            'X-Requested-With': 'XMLHttpRequest',
+            })
+
+        self.requests.append(
+                UrlRequest(
+                    base_url + '/login',
+                    method='POST',
+                    req_body=body,
+                    on_success=partial(
+                        self.auth_redirect,
+                        path,
+                        on_success=on_success,
+                        on_failure=on_failure,
+                        **kwargs),
+                    on_failure=self.popup_auth_failure))
+
 
     def get(self, on_success=None, on_failure=None, **kwargs):
         if kwargs:
@@ -134,12 +141,14 @@ class NdfApp(App):
     def send_success(self, *args):
         ''' Take note that the expense was accepted by the server.
         '''
+        n = None  # FIXME
         self.settings.remove_option('tosync', n[0])
         self.popup.progress += 1
 
     def send_failure(self, *args):
         ''' Indicate a failure to the user, keep the expense in record.
         '''
+        n = e  = None  # FIXME
         self.popup.progress += 1
         self.popup.errors.append('error treating %s: %s' % (n[0], e))
 
@@ -197,7 +206,7 @@ class AddScreen(Screen):
     ndf_type = StringProperty('')
 
     def on_ndf_type(self, *args):
-        print 'type changed: %s' % str(args)
+        Logger.debug("Ndf: note type changed: %s", str(args))
 
 
 class BacklogScreen(Screen):
