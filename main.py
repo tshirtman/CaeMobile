@@ -16,11 +16,9 @@ from json import JSONDecoder, JSONEncoder
 json_encode = JSONEncoder().encode
 json_decode = JSONDecoder().raw_decode
 
-
-DEFAULTSETTINGSFILE= '.default_config.ini'
+DEFAULTSETTINGSFILE = '.default_config.ini'
 SETTINGSFILE = 'config.ini'
 API_PATH = '/api/v1'
-
 
 __version__ = '0.01'
 
@@ -42,14 +40,13 @@ class NdfApp(App):
     requests = ListProperty([])
 
     def __init__(self, **kwargs):
-        super (NdfApp, self).__init__(**kwargs)
+        super(NdfApp, self).__init__(**kwargs)
         self.datalist_adapter = SimpleListAdapter(
                 data=self.datalist[:],
                 cls=ListItemButton,
                 args_converter=self.data_converter,
                 )
         self._cookie = None
-
 
     def build(self):
         settings = SafeConfigParser()
@@ -128,7 +125,7 @@ class NdfApp(App):
         }
 
         self.request(
-            self.settings.get('settings', 'server') +  API_PATH,
+            self.settings.get('settings', 'server') + API_PATH,
             on_success=self.send_success,
             on_failure=self.send_failure,
             req_body=body
@@ -186,6 +183,7 @@ class NdfApp(App):
             'size_hint_y': None,
             'height': '30sp'
             }
+
 
 class FirstScreen(Screen):
     pass
