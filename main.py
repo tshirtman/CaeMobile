@@ -1,4 +1,6 @@
 # coding: utf-8
+''' Kivy interface to manage expenses in autonomie
+'''
 
 from ConfigParser import SafeConfigParser
 from functools import partial
