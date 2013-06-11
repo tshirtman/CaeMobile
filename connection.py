@@ -38,7 +38,7 @@ class Connection(EventDispatcher):
         """
         returns the url for the application. Value is cached.
         """
-        if hasattr(self._base_url):
+        if hasattr(self, '_base_url'):
             return self._base_url
         base_url = self.server + API_PATH
 
