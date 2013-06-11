@@ -71,9 +71,8 @@ class NdfApp(App):
 
     def build(self):
         settings = SafeConfigParser()
-        print '%s: loaded' % settings.read((
-            DEFAULTSETTINGSFILE,
-            SETTINGSFILE))
+        loaded_settings = settings.read(SETTINGS_FILES)
+        Logger.debug("Ndf: loaded settings: %s", loaded_settings)
 
         # need to load config *before* assigning to self.settings
         self.settings = settings
