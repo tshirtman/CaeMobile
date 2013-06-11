@@ -47,6 +47,8 @@ class NdfApp(App):
                 )
 
     def sync(self, *args):
+        ''' Sync the pending expenses to remote server
+        '''
         self._connection = Connection(
                 login=self.settings.get('settings', 'login'),
                 password=self.settings.get('settings', 'password'),
