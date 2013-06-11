@@ -248,3 +248,13 @@ BoxLayout:
         Button:
             activated: root.done
             text: 'Ok'
+
+        ScrollView:
+            GridLayout:
+                height: self.minimum_height
+                size_hint_y: None
+                cols: 1
+
+                Label:
+                    text: ''.join(unicode(x) for x in root.errors)
+                    height: 2 * self.texture_size[1]
