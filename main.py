@@ -14,7 +14,6 @@ from kivy.properties import (
         ObjectProperty, ListProperty, StringProperty,
         BooleanProperty, NumericProperty)
 
-
 from connection import Connection
 
 DEFAULTSETTINGSFILE = '.default_config.ini'

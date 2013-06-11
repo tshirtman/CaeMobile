@@ -1,6 +1,7 @@
 #coding: utf-8
 ''' Connection object to manage the communication with autonomie server
 '''
+
 from kivy.network.urlrequest import UrlRequest
 from kivy.event import EventDispatcher
 from kivy.properties import (
@@ -33,13 +34,26 @@ class Connection(EventDispatcher):
         self.cookie = resp.headers.get('set-cookie')
         self.request(path, *args, **kwargs)
 
+    def base_url(self):
+        """
+        returns the url for the application. Value is cached.
+        """
+        if hasattr(self._base_url):
+            return self._base_url
+        base_url = self.server + API_PATH
+
+        if any(base_url.startswith(scheme)
+            for scheme in ('http://', 'https://')):
+            self._base_url = base_url
+        else:
+            self._base_url = 'https://%s' % base_url
+
+        return self._base_url
+
     def request(self, path, on_success, on_error, **kwargs):
         ''' Base method to send requests to server, autoconnect if needed
         '''
-        base_url = self.server + API_PATH
-        if not base_url.startswith('http://'):
-            base_url = 'http://' + base_url
-
+        base_url = self.base_url()
         if not self.cookie:
             Logger.info("Ndf: not logged in, authenticating")
             # get a cookie then call again
