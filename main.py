@@ -77,7 +77,6 @@ class NdfApp(App):
         # need to load config *before* assigning to self.settings
         self.settings = settings
 
-        print self.datalist_adapter
         return super(NdfApp, self).build()
 
     def get(self, on_success=None, on_error=None, **kwargs):
