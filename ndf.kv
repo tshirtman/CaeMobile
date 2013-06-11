@@ -14,6 +14,7 @@ BoxLayout:
             # XXX find a nice way to update this in UI
             text: 'sync (%s)' % (app.settings and len(app.settings.items('tosync')) or 0)
             on_press: app.sync(*args)
+            disabled: not app.settings or not len(app.settings.items('tosync'))
 
         MenuButton:
             source: 'data/icon.png'
