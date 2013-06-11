@@ -127,23 +127,11 @@ class NdfApp(App):
             }
 
 
-class FirstScreen(Screen):
-    pass
-
-
-class MenuScreen(Screen):
-    pass
-
-
 class AddScreen(Screen):
     ndf_type = StringProperty('')
 
     def on_ndf_type(self, *args):
         Logger.debug("Ndf: note type changed: %s", str(args))
-
-
-class BacklogScreen(Screen):
-    pass
 
 
 if __name__ == '__main__':
