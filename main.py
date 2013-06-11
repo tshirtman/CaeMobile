@@ -61,11 +61,13 @@ class NdfApp(App):
         self._connection.bind(errors=self.popup.setter('errors'))
         self._connection.sync()
 
-    def update_to_sync(self, *arg):
-        Logger.info('update_to_sync %s' % args)
+    def update_to_sync(self, *args):
+        Logger.info('Ndf: FIXME: update_to_sync %s' % args)
+
     def sync_update(self, *args):
 
         self._connection = None
+        Logger.warn("Ndf: FIXME: here, really update")
 
     def build(self):
         settings = SafeConfigParser()
