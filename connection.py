@@ -87,6 +87,7 @@ class Connection(EventDispatcher):
                     on_progress=Logger.info
                     )
 
+        # FIXME remove these requests when they are done
         self.requests.append(request)
 
     def send(self, expense):
@@ -118,8 +119,9 @@ class Connection(EventDispatcher):
     def connection_error(self, *args):
         '''
         '''
-        self.errors.append(
-                u'Erreur de connection, merci de vérifier vos identifiants')
+        error = u'Erreur de connection, merci de vérifier vos identifiants'
+        Logger.info(error)
+        self.errors.append(error)
         print args
 
     def sync(self, *args):
