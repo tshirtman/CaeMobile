@@ -48,6 +48,7 @@ class Connection(EventDispatcher):
         else:
             self._base_url = 'https://%s' % base_url
 
+        Logger.info('computed base_url: %s' % self._base_url)
         return self._base_url
 
     def request(self, path, on_success, on_error, **kwargs):
@@ -64,17 +65,21 @@ class Connection(EventDispatcher):
                 'X-Requested-With': 'XMLHttpRequest',
                 })
 
+            Logger.info(body)
+            accept_login = partial(
+                    self.auth_redirect,
+                    path,
+                    on_success=on_success,
+                    on_error=on_error,
+                    on_progress=Logger.info,
+                    **kwargs)
+
             request = UrlRequest(
                     base_url + '/login',
-                    method='POST',
                     req_body=body,
-                    on_success=partial(
-                        self.auth_redirect,
-                        path,
-                        on_success=on_success,
-                        on_error=on_error,
-                        on_progress=Logger.info,
-                        **kwargs),
+                    on_success=accept_login,
+                    on_redirect=accept_login,
+                    #on_progress=lambda *x: pudb.set_trace(),
                     on_error=self.connection_error)
 
         else:
@@ -116,13 +121,13 @@ class Connection(EventDispatcher):
         '''
         self.errors.append(expense[0], args)
 
-    def connection_error(self, *args):
+    def connection_error(self, request, *args):
         '''
         '''
         error = u'Erreur de connection, merci de vérifier vos identifiants'
         Logger.info(error)
         self.errors.append(error)
-        print args
+        Logger.debug(request)
 
     def sync(self, *args):
         ''' Send requests to sync all the pending expenses
