@@ -124,10 +124,10 @@ class Connection(EventDispatcher):
     def connection_error(self, request, *args):
         '''
         '''
-        error = u'Erreur de connection, merci de vérifier vos identifiants'
+        error = u'Erreur de connection, merci de vérifier vos identifiants\n'
         Logger.info(error)
         self.errors.append(error)
-        Logger.debug(request)
+        Logger.debug('%s' % request)
 
     def sync(self, *args):
         ''' Send requests to sync all the pending expenses

@@ -247,6 +247,7 @@ BoxLayout:
         Button:
             activated: root.done
             text: 'Ok'
+            on_press: root.dismiss()
 
         ScrollView:
             GridLayout:
@@ -256,4 +257,5 @@ BoxLayout:
 
                 Label:
                     text: ''.join(unicode(x) for x in root.errors)
-                    height: 2 * self.texture_size[1]
+                    size_hint_y: None
+                    height: self.texture_size[1] + 2 * self.line_height
