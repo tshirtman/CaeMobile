@@ -57,11 +57,15 @@ class Connection(EventDispatcher):
         base_url = self.base_url()
         if not self.cookie:
             Logger.info("Ndf: not logged in, authenticating")
+
             # get a cookie then call again
             body = JSON_ENCODE({
                 'login': self.login,
                 'password': self.password,
-                'submit': '', # reserved for future use
+                'submit': 'submit', # reserved for future use
+                })
+
+            headers = JSON_ENCODE({
                 'X-Requested-With': 'XMLHttpRequest',
                 })
 
@@ -77,6 +81,7 @@ class Connection(EventDispatcher):
             request = UrlRequest(
                     base_url + '/login',
                     req_body=body,
+                    req_headers=headers,
                     on_success=accept_login,
                     on_redirect=accept_login,
                     #on_progress=lambda *x: pudb.set_trace(),
