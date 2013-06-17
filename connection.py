@@ -27,11 +27,11 @@ class Connection(EventDispatcher):
     to_sync = DictProperty({})
     errors = ListProperty([])
 
-    def auth_redirect(self, resp, path, *args, **kwargs):
+    def auth_redirect(self, path, request, *args, **kwargs):
         ''' This should be called when a connection request succeed
         '''
-        Logger.info("Ndf: Must authenticate: %s", resp)
-        self.cookie = resp.headers.get('set-cookie')
+        Logger.info("Ndf: Must authenticate: %s")
+        self.cookie = request.resp_headers.get('set-cookie')
         self.request(path, *args, **kwargs)
 
     def base_url(self):
