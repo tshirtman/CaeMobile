@@ -27,12 +27,19 @@ class Connection(EventDispatcher):
     to_sync = DictProperty({})
     errors = ListProperty([])
 
-    def auth_redirect(self, path, request, *args, **kwargs):
+    def auth_redirect(self, path, request, result, **kwargs):
         ''' This should be called when a connection request succeed
         '''
         Logger.info("Ndf: Must authenticate: %s")
         self.cookie = request.resp_headers.get('set-cookie')
-        self.request(path, *args, **kwargs)
+        if result['status'] == 'success':
+            self.request(path, **kwargs)
+        else:
+            self.connection_error(
+                    request,
+                    error='Erreur de connection, merci de vérifier vos'
+                          'identifiants\n')
+
 
     def base_url(self):
         """
@@ -51,7 +58,7 @@ class Connection(EventDispatcher):
         Logger.info('computed base_url: %s' % self._base_url)
         return self._base_url
 
-    def request(self, path, on_success, on_error, **kwargs):
+    def request(self, path, req_body, **kwargs):
         ''' Base method to send requests to server, autoconnect if needed
         '''
         base_url = self.base_url()
@@ -73,8 +80,7 @@ class Connection(EventDispatcher):
             accept_login = partial(
                     self.auth_redirect,
                     path,
-                    on_success=on_success,
-                    on_error=on_error,
+                    req_body=req_body,
                     on_progress=Logger.info,
                     **kwargs)
 
@@ -84,17 +90,30 @@ class Connection(EventDispatcher):
                     req_headers=headers,
                     on_success=accept_login,
                     on_redirect=accept_login,
-                    #on_progress=lambda *x: pudb.set_trace(),
-                    on_error=self.connection_error)
+                    #on_progress=lambda *x: Logger.info(str(x)),
+                    on_error=partial(self.connection_error,
+                        error=r"Impossible de contacter le serveur renseigné "\
+                                "dans la configuration, veuillez vérifier "\
+                                "que l'adresse est correcte.")
+                )
+
 
         else:
+            on_success = kwargs.pop('on_success', None)
+            on_error = kwargs.pop('on_error', None)
+            on_progress = kwargs.pop('on_progress', None)
+            import pudb; pudb.set_trace()
+
             body = JSON_ENCODE(kwargs)
+
             request = UrlRequest(
                     base_url + path,
                     req_body=body,
                     on_success=on_success,
                     on_error=on_error,
-                    on_progress=Logger.info
+                    on_progress=on_progress,
+                    #on_progress=Logger.info,
+                    **kwargs
                     )
 
         # FIXME remove these requests when they are done
@@ -105,20 +124,19 @@ class Connection(EventDispatcher):
             the expense should be removed from the 'tosync' expenses, else, the
             error should be displayed.
         '''
-        body = JSON_ENCODE(expense)
-
         self.request(
                 'expenses',
                 method='POST',
-                req_body=body,
                 on_success=partial(self.send_success, expense),
-                on_error=partial(self.send_error, expense)
+                on_error=partial(self.send_error, expense),
+                req_body=expense
                 )
 
     def send_success(self, expense, *args):
         ''' Take note that the expense was accepted by the server.
         '''
         print expense, args
+        print "success"
         self.to_sync.pop()
 
     def send_error(self, expense, *args):
@@ -126,10 +144,9 @@ class Connection(EventDispatcher):
         '''
         self.errors.append(expense[0], args)
 
-    def connection_error(self, request, *args):
+    def connection_error(self, request, error='Undefined error', *args):
         '''
         '''
-        error = u'Erreur de connection, merci de vérifier vos identifiants\n'
         Logger.info(error)
         self.errors.append(error)
         Logger.debug('%s' % request)
@@ -139,5 +156,7 @@ class Connection(EventDispatcher):
         '''
         expenses = self.to_sync
 
-        for exp in expenses:
-            self.send(exp)
+        #import pudb; pudb.set_trace()
+        for _id, data  in expenses.items():
+            print _id, data
+            self.send(data)
