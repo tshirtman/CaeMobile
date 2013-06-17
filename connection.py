@@ -65,9 +65,9 @@ class Connection(EventDispatcher):
                 'submit': 'submit', # reserved for future use
                 })
 
-            headers = JSON_ENCODE({
+            headers = {
                 'X-Requested-With': 'XMLHttpRequest',
-                })
+                }
 
             Logger.info(body)
             accept_login = partial(
