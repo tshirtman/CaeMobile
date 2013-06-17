@@ -10,10 +10,8 @@ from kivy.uix.label import Label
 from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
 from kivy.adapters.simplelistadapter import SimpleListAdapter
-from kivy.properties import (
-        ObjectProperty, ListProperty, StringProperty,
-        BooleanProperty, NumericProperty)
-
+from kivy.properties import (BooleanProperty, ListProperty, NumericProperty,
+                             ObjectProperty, StringProperty)
 from connection import Connection
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
@@ -39,22 +37,21 @@ class NdfApp(App):
     settings = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super (NdfApp, self).__init__(**kwargs)
+        super(NdfApp, self).__init__(**kwargs)
         self.datalist_adapter = SimpleListAdapter(
-                data=self.datalist[:],
-                cls=ListItemButton,
-                args_converter=self.data_converter,
-                )
+            data=self.datalist[:],
+            cls=ListItemButton,
+            args_converter=self.data_converter)
 
     def sync(self, *args):
         ''' Sync the pending expenses to remote server
         '''
         self._connection = Connection(
-                login=self.settings.get('settings', 'login'),
-                password=self.settings.get('settings', 'password'),
-                server=self.settings.get('settings', 'server'),
-                to_sync=self.settings.items('tosync'),
-                )
+            login=self.settings.get('settings', 'login'),
+            password=self.settings.get('settings', 'password'),
+            server=self.settings.get('settings', 'server'),
+            to_sync=self.settings.items('tosync'),
+            )
 
         self.popup = SyncPopup()
         self.popup.open()
