@@ -131,6 +131,7 @@ BoxLayout:
                 on_text_validate:
                     app.settings.set('settings', 'server', args[0].text)
                     login.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
             Label:
                 text: 'login'
                 size_hint_y: None
@@ -142,8 +143,10 @@ BoxLayout:
                 height: small_button_height
                 text: app.settings and app.settings.get('settings', 'login') or ''
                 on_text_validate:
+                    print "setting login"
                     app.settings.set('settings', 'login', args[0].text)
                     password.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             Label:
                 size_hint_y: None
@@ -159,6 +162,7 @@ BoxLayout:
                     app.settings.set('settings', 'password', args[0].text)
 
                 password: True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             Label:
                 size_hint_y: None
