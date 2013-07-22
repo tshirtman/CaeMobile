@@ -113,7 +113,6 @@ class Connection(EventDispatcher):
             on_success = kwargs.pop('on_success', None)
             on_error = kwargs.pop('on_error', None)
             on_progress = kwargs.pop('on_progress', None)
-            import pudb; pudb.set_trace()
 
             body = JSON_ENCODE(kwargs)
 
@@ -168,7 +167,6 @@ class Connection(EventDispatcher):
         '''
         expenses = self.to_sync
 
-        #import pudb; pudb.set_trace()
         for _id, data  in expenses.items():
             Logger.info(_id)
             Logger.info(data)
