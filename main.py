@@ -10,8 +10,13 @@ from kivy.uix.label import Label
 from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
 from kivy.adapters.simplelistadapter import SimpleListAdapter
-from kivy.properties import (BooleanProperty, ListProperty, NumericProperty,
-                             ObjectProperty, StringProperty)
+from kivy.properties import (
+                BooleanProperty,
+                ListProperty,
+                NumericProperty,
+                ObjectProperty,
+                StringProperty,
+                )
 from connection import Connection
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
@@ -35,6 +40,7 @@ class NdfApp(App):
     datalist_adapter = ObjectProperty(None)
     datalist = ListProperty([])
     settings = ObjectProperty()
+    check_auth_token = StringProperty(u"")
 
     def __init__(self, **kwargs):
         super(NdfApp, self).__init__(**kwargs)
@@ -43,21 +49,50 @@ class NdfApp(App):
             cls=ListItemButton,
             args_converter=self.data_converter)
 
-    def sync(self, *args):
-        ''' Sync the pending expenses to remote server
-        '''
-        self._connection = Connection(
+    def get_connection(self):
+        """
+            Return a connection object
+        """
+        return Connection(
             login=self.settings.get('settings', 'login'),
             password=self.settings.get('settings', 'password'),
             server=self.settings.get('settings', 'server'),
             to_sync=self.settings.items('tosync'),
             )
 
+    def sync(self, *args):
+        ''' Sync the pending expenses to remote server
+        '''
+        self._connection = self.get_connection()
+
         self.popup = SyncPopup()
         self.popup.open()
         self._connection.bind(to_sync=self.update_to_sync)
         self._connection.bind(errors=self.popup.setter('errors'))
         self._connection.sync()
+
+    def check_auth(self):
+        """
+            Launch an authentication check
+        """
+        Logger.info("Checking auth : NDFAPP")
+        _connection = self.get_connection()
+        _connection.check_auth(self.auth_ok, self.auth_error)
+
+    def auth_ok(self, *args):
+        """
+            Launched if the authentication test succeeded
+        """
+        if args[1]['status'] == 'success':
+            self.check_auth_token = u"Authentification réussie"
+        else:
+            self.auth_error()
+
+    def auth_error(self, *args):
+        """
+            Launched if the authentication test failed
+        """
+        self.check_auth_token = u"Erreur d'authentification"
 
     def update_to_sync(self, *args):
         Logger.info('Ndf: FIXME: update_to_sync %s' % args)

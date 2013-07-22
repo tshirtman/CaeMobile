@@ -57,7 +57,7 @@ class Connection(EventDispatcher):
         Logger.info('computed base_url: %s' % self._base_url)
         return self._base_url
 
-    def get_headers(self):
+    def _get_headers(self):
         """
             Return the headers used to request the remote rest api
         """
@@ -69,6 +69,30 @@ class Connection(EventDispatcher):
             headers["Cookie"] = self.cookie
         return headers
 
+    def _get_request(self, url, body, on_success, on_error, on_progress=None, \
+            **kwargs):
+        headers = self._get_headers()
+        return UrlRequest(
+                url,
+                req_body=body,
+                req_headers=headers,
+                on_success=on_success,
+                on_error=on_error,
+                on_progress=on_progress,
+                **kwargs)
+
+    def _get_credentials(self):
+        """
+            Return the credentials used for the auth request
+        """
+        Logger.debug("Credentials : {0} {1}".format(self.login, self.password))
+        return JSON_ENCODE({
+                'login': self.login,
+                'password': self.password,
+                'submit': 'submit', # reserved for future use
+                })
+
+
     def request(self, path, req_body, **kwargs):
         ''' Base method to send requests to server, autoconnect if needed
         '''
@@ -77,13 +101,7 @@ class Connection(EventDispatcher):
             Logger.info("Ndf: not logged in, authenticating")
 
             # get a cookie then call again
-            body = JSON_ENCODE({
-                'login': self.login,
-                'password': self.password,
-                'submit': 'submit', # reserved for future use
-                })
-
-            headers = self.get_headers()
+            body = self._get_credentials()
 
             Logger.info(body)
 
@@ -94,35 +112,32 @@ class Connection(EventDispatcher):
                     on_progress=Logger.info,
                     **kwargs
                     )
-
-            request = UrlRequest(
-                    base_url + '/login',
-                    req_body=body,
-                    req_headers=headers,
-                    on_success=accept_login,
-                    on_redirect=accept_login,
-                    on_error=partial(self.connection_error,
+            on_error = partial(self.connection_error,
                         error=r"Impossible de contacter le serveur renseigné "\
                                 "dans la configuration, veuillez vérifier "\
                                 "que l'adresse est correcte.")
-                    )
+
+
+            request = self._get_request(
+                    base_url + '/login',
+                    body,
+                    accept_login,
+                    on_error)
 
 
         else:
-            headers = self.get_headers()
             on_success = kwargs.pop('on_success', None)
             on_error = kwargs.pop('on_error', None)
             on_progress = kwargs.pop('on_progress', None)
 
             body = JSON_ENCODE(kwargs)
 
-            request = UrlRequest(
+            request = self._get_request(
                     base_url + path,
-                    req_headers=headers,
-                    req_body=body,
-                    on_success=on_success,
-                    on_error=on_error,
-                    on_progress=on_progress,
+                    body,
+                    on_success,
+                    on_error,
+                    on_progress,
                     **kwargs
                     )
 
@@ -171,3 +186,12 @@ class Connection(EventDispatcher):
             Logger.info(_id)
             Logger.info(data)
             self.send(data)
+
+
+    def check_auth(self, success, error):
+        """
+            Check authentification and launch the callback
+        """
+        url = self.base_url() + '/login'
+        body = self._get_credentials()
+        request = self._get_request(url, body, success, error)

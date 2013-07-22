@@ -132,6 +132,7 @@ BoxLayout:
                     app.settings.set('settings', 'server', args[0].text)
                     login.focus = True
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             Label:
                 text: 'login'
                 size_hint_y: None
@@ -143,7 +144,6 @@ BoxLayout:
                 height: small_button_height
                 text: app.settings and app.settings.get('settings', 'login') or ''
                 on_text_validate:
-                    print "setting login"
                     app.settings.set('settings', 'login', args[0].text)
                     password.focus = True
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
@@ -160,7 +160,6 @@ BoxLayout:
                 text: app.settings and app.settings.get('settings', 'password') or ''
                 on_text_validate:
                     app.settings.set('settings', 'password', args[0].text)
-
                 password: True
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
 
@@ -175,6 +174,18 @@ BoxLayout:
                 on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
             Widget:
             Widget:
+
+            Button:
+                size_hint_y: None
+                height: small_button_height
+                text: "Tester l'authentification"
+                on_press:
+                    app.check_auth()
+
+            Label:
+                size_hint_y: None
+                height: small_button_height
+                text: app.check_auth_token
 
 
 <AddScreen>:
