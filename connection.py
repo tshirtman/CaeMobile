@@ -40,7 +40,6 @@ class Connection(EventDispatcher):
                     error='Erreur de connection, merci de vérifier vos'
                           'identifiants\n')
 
-
     def base_url(self):
         """
         returns the url for the application. Value is cached.
@@ -58,6 +57,18 @@ class Connection(EventDispatcher):
         Logger.info('computed base_url: %s' % self._base_url)
         return self._base_url
 
+    def get_headers(self):
+        """
+            Return the headers used to request the remote rest api
+        """
+        headers = {'Content-type': 'text/json',
+                'Accept': 'text/json',
+                'X-Requested-With':'XMLHttpRequest'
+                }
+        if self.cookie is not None:
+            headers["Cookie"] = self.cookie
+        return headers
+
     def request(self, path, req_body, **kwargs):
         ''' Base method to send requests to server, autoconnect if needed
         '''
@@ -72,17 +83,17 @@ class Connection(EventDispatcher):
                 'submit': 'submit', # reserved for future use
                 })
 
-            headers = {
-                'X-Requested-With': 'XMLHttpRequest',
-                }
+            headers = self.get_headers()
 
             Logger.info(body)
+
             accept_login = partial(
                     self.auth_redirect,
                     path,
                     req_body=req_body,
                     on_progress=Logger.info,
-                    **kwargs)
+                    **kwargs
+                    )
 
             request = UrlRequest(
                     base_url + '/login',
@@ -90,15 +101,15 @@ class Connection(EventDispatcher):
                     req_headers=headers,
                     on_success=accept_login,
                     on_redirect=accept_login,
-                    #on_progress=lambda *x: Logger.info(str(x)),
                     on_error=partial(self.connection_error,
                         error=r"Impossible de contacter le serveur renseigné "\
                                 "dans la configuration, veuillez vérifier "\
                                 "que l'adresse est correcte.")
-                )
+                    )
 
 
         else:
+            headers = self.get_headers()
             on_success = kwargs.pop('on_success', None)
             on_error = kwargs.pop('on_error', None)
             on_progress = kwargs.pop('on_progress', None)
@@ -108,11 +119,11 @@ class Connection(EventDispatcher):
 
             request = UrlRequest(
                     base_url + path,
+                    req_headers=headers,
                     req_body=body,
                     on_success=on_success,
                     on_error=on_error,
                     on_progress=on_progress,
-                    #on_progress=Logger.info,
                     **kwargs
                     )
 
@@ -135,12 +146,13 @@ class Connection(EventDispatcher):
     def send_success(self, expense, *args):
         ''' Take note that the expense was accepted by the server.
         '''
-        print expense, args
-        print "success"
+        Logger.info("Successfully sent the expense :")
+        Logger.info(expense)
+        Logger.info(args)
         self.to_sync.pop()
 
     def send_error(self, expense, *args):
-        ''' Indicate a error to the user, keep the expense in record.
+        ''' Indicate an error to the user, keep the expense in record.
         '''
         self.errors.append(expense[0], args)
 
@@ -158,5 +170,6 @@ class Connection(EventDispatcher):
 
         #import pudb; pudb.set_trace()
         for _id, data  in expenses.items():
-            print _id, data
+            Logger.info(_id)
+            Logger.info(data)
             self.send(data)
