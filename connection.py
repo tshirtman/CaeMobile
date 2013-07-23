@@ -48,7 +48,9 @@ class Connection(EventDispatcher):
         """
         if hasattr(self, '_base_url'):
             return self._base_url
-        base_url = self.server + API_PATH
+        if not self.server.endswith('/'):
+            self.server += '/'
+        base_url = urlparse.urljoin(self.server, API_PATH)
 
         if any(base_url.startswith(scheme)
             for scheme in ('http://', 'https://')):
@@ -134,6 +136,7 @@ class Connection(EventDispatcher):
 
             body = JSON_ENCODE(kwargs)
             url = urlparse.urljoin(base_url, path)
+            Logger.info("   + Calling the following url : %s" % url)
 
             request = self._get_request(
                     url,
