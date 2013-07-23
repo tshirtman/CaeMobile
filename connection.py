@@ -52,7 +52,7 @@ class Connection(EventDispatcher):
             for scheme in ('http://', 'https://')):
             self._base_url = base_url
         else:
-            self._base_url = 'https://%s' % base_url
+            self._base_url = 'http://%s' % base_url
 
         Logger.info('computed base_url: %s' % self._base_url)
         return self._base_url
