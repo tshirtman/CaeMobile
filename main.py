@@ -81,34 +81,38 @@ class NdfApp(App):
         self._connection.bind(errors=self.popup.setter('errors'))
         self._connection.sync()
 
+    def check_configuration(self):
+        self.check_auth()
+
     def check_auth(self):
         """
             Launch an authentication check
         """
         Logger.info("Checking auth : NDFAPP")
         _connection = self.get_connection()
-        _connection.check_auth(self.auth_ok, self.auth_error)
+        _connection.check_auth(self.check_auth_success, self.check_auth_error)
 
-    def auth_ok(self, request, resp):
+    def check_auth_success(self, request, resp):
         """
             Launched if the authentication test succeeded
         """
         if request.resp_status == 301:
-            self.auth_redirect(request, resp)
+            self.check_auth_redirect(request, resp)
         elif hasattr(resp, 'get') and resp.get('status') == 'success':
             Logger.info("Authentication test succeeded")
             self.check_auth_token = u"Authentification réussie"
+            self.fetch_options()
         else:
             Logger.info("Authentication test failed")
-            self.auth_error()
+            self.check_auth_error()
 
-    def auth_error(self, *args):
+    def check_auth_error(self, *args):
         """
             Launched if the authentication test failed
         """
         self.check_auth_token = u"Erreur d'authentification"
 
-    def auth_redirect(self, request, resp):
+    def check_auth_redirect(self, request, resp):
         """
             Launch if the authentication test faced a redirect
         """
@@ -123,6 +127,37 @@ class NdfApp(App):
         self.settings.set('settings', 'server', new_url)
         self.property('settings').dispatch(self)
         self.check_auth()
+
+    def fetch_options(self):
+        """
+            Fetch options for expense configuration
+        """
+        path = "expenseoptions"
+        conn = self.get_connection()
+        conn.request(
+                path,
+                {},
+                on_success=self.fetch_options_success,
+                on_error=self.fetch_options_error)
+
+    def fetch_options_success(self, request, resp):
+        """
+            Fetch options success handler
+        """
+        Logger.info("%s" % resp)
+        if resp.get('status', 'error') == 'success':
+            self.store_options(resp.get('result'))
+        else:
+            self.fetch_options_error(request, resp)
+
+    def fetch_options_error(self, request, resp):
+        """
+            Error while fetching options
+        """
+        self.check_auth_token = u"Une erreur inconnue est survenue"
+
+    def store_options(self, options):
+        Logger.info("Storing options %s" % options)
 
     def update_to_sync(self, *args):
         Logger.info('Ndf: FIXME: update_to_sync %s' % args)

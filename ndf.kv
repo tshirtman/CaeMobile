@@ -99,7 +99,7 @@ BoxLayout:
             size_hint_y: None
             height: small_button_height
         Button:
-            text: 'Settings'
+            text: 'Configuration'
             on_press:
                 root.manager.transition.direction = 'down'
                 root.manager.current = 'settings'
@@ -172,20 +172,21 @@ BoxLayout:
                 height: small_button_height
                 active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
                 on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
-            Widget:
-            Widget:
 
             Button:
                 size_hint_y: None
                 height: small_button_height
-                text: "Tester l'authentification"
+                text: "Configurer"
                 on_press:
-                    app.check_auth()
+                    app.check_configuration()
 
             Label:
                 size_hint_y: None
                 height: small_button_height
                 text: app.check_auth_token
+
+            Widget:
+            Widget:
 
 
 <AddScreen>:
@@ -252,7 +253,7 @@ BoxLayout:
                     pos: self.x + 4, self.y + 4
                     size:
                         (
-                        (self.width - 8) * (root.progress / len(app.settings.items('tosync'))),
+                        (self.width - 8) * (root.progress / (len(app.settings.items('tosync'))+1)),
                         self.height - 8
                         )
         Button:
