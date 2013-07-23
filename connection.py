@@ -2,6 +2,8 @@
 ''' Connection object to manage the communication with autonomie server
 '''
 
+import urlparse
+
 from kivy.network.urlrequest import UrlRequest
 from kivy.event import EventDispatcher
 from kivy.properties import (
@@ -14,7 +16,7 @@ from json import JSONDecoder, JSONEncoder
 JSON_ENCODE = JSONEncoder().encode
 JSON_DECODE = JSONDecoder().raw_decode
 
-API_PATH = '/api/v1'
+API_PATH = '/api/v1/'
 
 class Connection(EventDispatcher):
     ''' see module config
@@ -109,7 +111,7 @@ class Connection(EventDispatcher):
                     self.auth_redirect,
                     path,
                     req_body=req_body,
-                    on_progress=Logger.info,
+                    #on_progress=Logger.info,
                     **kwargs
                     )
             on_error = partial(self.connection_error,
@@ -131,9 +133,10 @@ class Connection(EventDispatcher):
             on_progress = kwargs.pop('on_progress', None)
 
             body = JSON_ENCODE(kwargs)
+            url = urlparse.urljoin(base_url, path)
 
             request = self._get_request(
-                    base_url + path,
+                    url,
                     body,
                     on_success,
                     on_error,
