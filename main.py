@@ -26,6 +26,16 @@ SETTINGS_FILES = DEFAULTSETTINGSFILE, SETTINGSFILE
 __version__ = '0.01'
 
 
+def get_base_url(url):
+    """
+        Return scheme + location
+    """
+    import urlparse
+    result = urlparse.urlsplit(url)
+    scheme = result.scheme or 'http'
+    return "{0}://{1}/".format(scheme, result.netloc)
+
+
 class SyncPopup(Popup):
     ''' This popup display the current syncing state in the app
     '''
@@ -79,13 +89,17 @@ class NdfApp(App):
         _connection = self.get_connection()
         _connection.check_auth(self.auth_ok, self.auth_error)
 
-    def auth_ok(self, *args):
+    def auth_ok(self, request, resp):
         """
             Launched if the authentication test succeeded
         """
-        if args[1]['status'] == 'success':
+        if request.resp_status == 301:
+            self.auth_redirect(request, resp)
+        elif hasattr(resp, 'get') and resp.get('status') == 'success':
+            Logger.info("Authentication test succeeded")
             self.check_auth_token = u"Authentification réussie"
         else:
+            Logger.info("Authentication test failed")
             self.auth_error()
 
     def auth_error(self, *args):
@@ -94,23 +108,41 @@ class NdfApp(App):
         """
         self.check_auth_token = u"Erreur d'authentification"
 
+    def auth_redirect(self, request, resp):
+        """
+            Launch if the authentication test faced a redirect
+        """
+        # 1- Change the url
+        # 2- Launch the check_auth again
+        Logger.info("Page has moved permanently, we change the url")
+        #The page has moved permanently
+        url = self.settings.get('settings', 'server')
+        new_url = request.resp_headers.get('location', url)
+        new_url = get_base_url(new_url)
+
+        self.settings.set('settings', 'server', new_url)
+        self.property('settings').dispatch(self)
+        self.check_auth()
+
     def update_to_sync(self, *args):
         Logger.info('Ndf: FIXME: update_to_sync %s' % args)
 
     def sync_update(self, *args):
-
         self._connection = None
         Logger.warn("Ndf: FIXME: here, really update")
 
     def build(self):
-        settings = SafeConfigParser()
-        loaded_settings = settings.read(SETTINGS_FILES)
-        Logger.debug("Ndf: loaded settings: %s", loaded_settings)
-
+        settings = self.load_settings()
         # need to load config *before* assigning to self.settings
         self.settings = settings
 
         return super(NdfApp, self).build()
+
+    def load_settings(self):
+        settings = SafeConfigParser()
+        loaded_settings = settings.read(SETTINGS_FILES)
+        Logger.debug("Ndf: loaded settings: %s", loaded_settings)
+        return settings
 
     def get(self, on_success=None, on_error=None, **kwargs):
         if kwargs:
@@ -131,13 +163,14 @@ class NdfApp(App):
     def on_pause(self, *args):
         ''' Implement on_pause to save data before going to sleep on android.
         '''
-        with open(SETTINGSFILE, 'w') as f:
-            self.settings.write(f)
-        return True
+        return self.save_settings()
 
     def on_stop(self, *args):
         ''' Called when the application is stopped, save data.
         '''
+        return self.save_settings()
+
+    def save_settings(self):
         with open(SETTINGSFILE, 'w') as f:
             self.settings.write(f)
         return True
