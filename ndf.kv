@@ -115,63 +115,69 @@ BoxLayout:
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'menu'
 
-        GridLayout:
-            cols: 2
+        BoxLayout:
+            orientation: 'vertical'
+            Widget:
+            GridLayout:
+                cols: 2
+                Widget:
+                Widget:
+                Label:
+                    text: 'Serveur'
+                    size_hint_y: None
+                    height: small_button_height
+                TextInput:
+                    multiline: False
+                    size_hint_y: None
+                    height: small_button_height
+                    text: app.settings and app.settings.get('settings', 'server') or ''
+                    on_text_validate:
+                        app.settings.set('settings', 'server', args[0].text)
+                        login.focus = True
+                    on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+                Label:
+                    text: 'login'
+                    size_hint_y: None
+                    height: small_button_height
+                TextInput:
+                    id: login
+                    multiline: False
+                    size_hint_y: None
+                    height: small_button_height
+                    text: app.settings and app.settings.get('settings', 'login') or ''
+                    on_text_validate:
+                        app.settings.set('settings', 'login', args[0].text)
+                        password.focus = True
+                    on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+                Label:
+                    size_hint_y: None
+                    height: small_button_height
+                    text: 'password'
+                TextInput:
+                    id: password
+                    size_hint_y: None
+                    height: small_button_height
+                    multiline: False
+                    text: app.settings and app.settings.get('settings', 'password') or ''
+                    on_text_validate:
+                        app.settings.set('settings', 'password', args[0].text)
+                    password: True
+                    on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+                Label:
+                    size_hint_y: None
+                    height: small_button_height
+                    text: 'sync on wifi only'
+                Switch:
+                    size_hint_y: None
+                    height: small_button_height
+                    active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
+                    on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
+
             Widget:
             Widget:
-            Label:
-                text: 'Serveur'
-                size_hint_y: None
-                height: small_button_height
-            TextInput:
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
-                text: app.settings and app.settings.get('settings', 'server') or ''
-                on_text_validate:
-                    app.settings.set('settings', 'server', args[0].text)
-                    login.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
-
-            Label:
-                text: 'login'
-                size_hint_y: None
-                height: small_button_height
-            TextInput:
-                id: login
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
-                text: app.settings and app.settings.get('settings', 'login') or ''
-                on_text_validate:
-                    app.settings.set('settings', 'login', args[0].text)
-                    password.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
-
-            Label:
-                size_hint_y: None
-                height: small_button_height
-                text: 'password'
-            TextInput:
-                id: password
-                size_hint_y: None
-                height: small_button_height
-                multiline: False
-                text: app.settings and app.settings.get('settings', 'password') or ''
-                on_text_validate:
-                    app.settings.set('settings', 'password', args[0].text)
-                password: True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
-
-            Label:
-                size_hint_y: None
-                height: small_button_height
-                text: 'sync on wifi only'
-            Switch:
-                size_hint_y: None
-                height: small_button_height
-                active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
-                on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
 
             Button:
                 size_hint_y: None
@@ -180,12 +186,6 @@ BoxLayout:
                 on_press:
                     app.check_configuration()
 
-            Label:
-                size_hint_y: None
-                height: small_button_height
-                text: app.check_auth_token
-
-            Widget:
             Widget:
 
 

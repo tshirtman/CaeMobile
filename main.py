@@ -7,8 +7,10 @@ from kivy.app import App
 from kivy.logger import Logger
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
+from kivy.uix.boxlayout import BoxLayout
 from kivy.adapters.simplelistadapter import SimpleListAdapter
 from kivy.properties import (
                 BooleanProperty,
@@ -50,7 +52,6 @@ class NdfApp(App):
     datalist_adapter = ObjectProperty(None)
     datalist = ListProperty([])
     settings = ObjectProperty()
-    check_auth_token = StringProperty(u"")
 
     def __init__(self, **kwargs):
         super(NdfApp, self).__init__(**kwargs)
@@ -100,7 +101,6 @@ class NdfApp(App):
             self.check_auth_redirect(request, resp)
         elif hasattr(resp, 'get') and resp.get('status') == 'success':
             Logger.info("Authentication test succeeded")
-            self.check_auth_token = u"Authentification réussie"
             self.fetch_options()
         else:
             Logger.info("Authentication test failed")
@@ -110,7 +110,10 @@ class NdfApp(App):
         """
             Launched if the authentication test failed
         """
-        self.check_auth_token = u"Erreur d'authentification"
+        self.dialog(
+                title=u"Erreur d'authentification",
+                text=u"Veuillez vérifier votre configuration"
+                )
 
     def check_auth_redirect(self, request, resp):
         """
@@ -149,12 +152,18 @@ class NdfApp(App):
             self.store_options(resp.get('result'))
         else:
             self.fetch_options_error(request, resp)
+        self.dialog(
+                title=u"Configuration réussie",
+                text=u"Votre application a bien été configurée")
 
     def fetch_options_error(self, request, resp):
         """
             Error while fetching options
         """
-        self.check_auth_token = u"Une erreur inconnue est survenue"
+        self.dialog(
+                title=u"Erreur à la configuration",
+                text=u"Une erreur inconnue a été rencontrée lors de la " \
+                        "configuration de l'application.")
 
     def store_options(self, options):
         Logger.info("Storing options %s" % options)
@@ -187,13 +196,17 @@ class NdfApp(App):
         else:
             self.request('path')
 
-    def popup_auth_error(self, *args):
-        Logger.warning("Ndf: Erreur d'authentification")
-        p = Popup(
-            title="Erreur d'authentification",
-            content=Label(text=u'Vérifiez la configuration')
-            )
-        Logger.debug("Ndf: popup for auth error (%s)", p)
+    def dialog(self, title, text):
+        """
+            Fires a simple dialog popup
+        """
+        content = BoxLayout(orientation='vertical')
+        content.add_widget(Label(text=text))
+        btnclose = Button(text="Fermer")
+        content.add_widget(btnclose)
+        popup_ = Popup( title=title, content=content )
+        btnclose.bind(on_release=popup_.dismiss)
+        popup_.open()
 
     def on_pause(self, *args):
         ''' Implement on_pause to save data before going to sleep on android.
