@@ -1,6 +1,7 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 ''' Kivy interface to manage expenses in autonomie
 '''
+import json
 
 from ConfigParser import SafeConfigParser
 from kivy.app import App
@@ -18,6 +19,7 @@ from kivy.properties import (
                 NumericProperty,
                 ObjectProperty,
                 StringProperty,
+                DictProperty,
                 )
 from connection import Connection
 
@@ -50,13 +52,13 @@ class NdfApp(App):
     ''' #TODO
     '''
     datalist_adapter = ObjectProperty(None)
-    datalist = ListProperty([])
     settings = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(NdfApp, self).__init__(**kwargs)
+        self.datalist = []
         self.datalist_adapter = SimpleListAdapter(
-            data=self.datalist[:],
+            data=self.datalist,
             cls=ListItemButton,
             args_converter=self.data_converter)
 
@@ -89,7 +91,7 @@ class NdfApp(App):
         """
             Launch an authentication check
         """
-        Logger.info("Checking auth : NDFAPP")
+        Logger.info("Ndf : Checking auth : NDFAPP")
         _connection = self.get_connection()
         _connection.check_auth(self.check_auth_success, self.check_auth_error)
 
@@ -100,10 +102,10 @@ class NdfApp(App):
         if request.resp_status == 301:
             self.check_auth_redirect(request, resp)
         elif hasattr(resp, 'get') and resp.get('status') == 'success':
-            Logger.info("Authentication test succeeded")
+            Logger.info("Ndf : Authentication test succeeded")
             self.fetch_options()
         else:
-            Logger.info("Authentication test failed")
+            Logger.info("Ndf : Authentication test failed")
             self.check_auth_error()
 
     def check_auth_error(self, *args):
@@ -121,7 +123,7 @@ class NdfApp(App):
         """
         # 1- Change the url
         # 2- Launch the check_auth again
-        Logger.info("Page has moved permanently, we change the url")
+        Logger.info("Ndf : Page has moved permanently, we change the url")
         #The page has moved permanently
         url = self.settings.get('settings', 'server')
         new_url = request.resp_headers.get('location', url)
@@ -147,7 +149,6 @@ class NdfApp(App):
         """
             Fetch options success handler
         """
-        Logger.info("%s" % resp)
         if resp.get('status', 'error') == 'success':
             self.store_options(resp.get('result'))
         else:
@@ -166,7 +167,14 @@ class NdfApp(App):
                         "configuration de l'application.")
 
     def store_options(self, options):
-        Logger.info("Storing options %s" % options)
+        """
+            Store expensetypes (options) retrieved from the server
+        """
+        Logger.info("Ndf : Storing options %s" % options)
+        if not self.settings.has_section('main'):
+            self.settings.add_section('main')
+        self.settings.set('main', 'expensetypes', json.dumps(options))
+        self.property('settings').dispatch(self)
 
     def update_to_sync(self, *args):
         Logger.info('Ndf: FIXME: update_to_sync %s' % args)
@@ -179,7 +187,6 @@ class NdfApp(App):
         settings = self.load_settings()
         # need to load config *before* assigning to self.settings
         self.settings = settings
-
         return super(NdfApp, self).build()
 
     def load_settings(self):
@@ -228,11 +235,6 @@ class NdfApp(App):
         '''
         return True
 
-    def on_datalist(self, *args):
-        '''
-        '''
-        self.datalist_adapter.data = self.datalist[:]
-
     def data_converter(self, row_index, element):
         return {
             'text': element['title'],
@@ -240,12 +242,39 @@ class NdfApp(App):
             'height': '30sp'
             }
 
+    def store_expense(self, screen_name):
+        manager = self.root.ids.screenmanager
+        screen = manager.get_screen(screen_name)
+        expense = screen.expense
+        # TODO: add validation
+        if expense:
+            Logger.debug("Ndf : Storing an expense %s" % expense)
+            self.datalist_adapter.data.append(expense)
+            self.property('datalist_adapter').dispatch(self)
+            screen.expense = {}
+
 
 class AddScreen(Screen):
-    ndf_type = StringProperty('')
+    ndf_type = StringProperty('Type de frais')
 
-    def on_ndf_type(self, *args):
-        Logger.debug("Ndf: note type changed: %s", str(args))
+    def on_ndf_type(self, screen, value):
+        if value == 'km':
+            self.manager.transition.direction = 'left'
+            self.manager.current = "kmform"
+        elif value == 'tel':
+            pass
+        else:
+            pass
+        # Reset the spinner to the default value
+        self.ndf_type = "Type de frais"
+
+
+class KmFormScreen(Screen):
+    expense = DictProperty({})
+
+    def set_value(self, key, value):
+        Logger.debug(u"Ndf : Setting a value for {0} : {1}".format(key, value))
+        self.expense[key] = value
 
 
 if __name__ == '__main__':
