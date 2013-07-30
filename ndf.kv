@@ -11,9 +11,10 @@ BoxLayout:
         MenuButton:
             source: 'data/sync.png'
             # XXX find a nice way to update this in UI
-            text: 'sync (%s)' % (app.settings and len(app.settings.items('tosync')) or 0)
-            on_press: app.sync(*args)
-            disabled: not app.settings or not len(app.settings.items('tosync'))
+#            text: 'sync (%s)' % (app.settings and len(app.settings.items('tosync')) or 0)
+            text: 'sync (%s)' % (app.pool and len(app.pool.tosync()) or 0)
+            on_press: app.sync_datas()
+            disabled: not app.pool or not len(app.pool.tosync())
 
         MenuButton:
             source: 'data/icon.png'
@@ -247,26 +248,25 @@ BoxLayout:
                     height: small_button_height
                     state: root.expense and root.expense.get('category') == "1" and 'down' or 'normal'
                     on_release:
-                        root.set_value("category", "1")
+                        root.set_value("category", u"1")
                 ToggleButton:
                     text: "Frais liés à l'activité auprès de vos clients"
                     group: "category"
                     height: small_button_height
                     state: root.expense and root.expense.get('category') == "2" and 'down' or 'normal'
                     on_release:
-                        root.set_value("category", "2")
+                        root.set_value("category", u"2")
             Label:
                 text: "Type de frais"
                 size_hint_y: None
                 height: small_button_height
             Spinner:
-                id: type_spinner
                 text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
                 values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes')] or []
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value("type", args[0].text)
+                    root.set_type(args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
             Label:
                 text: "Date"
             Widget:
@@ -301,9 +301,9 @@ BoxLayout:
                 multiline: False
                 size_hint_y: None
                 height: small_button_height
-                text: root.expense and root.expense.get('ht') or ""
+                text: root.expense and root.expense.get('km') or ""
                 on_text_validate:
-                    root.set_value('ht', args[0].text)
+                    root.set_value('km', args[0].text)
                     description.focus = True
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
             Label:
@@ -345,6 +345,7 @@ BoxLayout:
             text: "Liste des notes de frais"
 
         ListView:
+            size_hint: .8,.8
             adapter: app.datalist_adapter
 
 <SyncPopup>:

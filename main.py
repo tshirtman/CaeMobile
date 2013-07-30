@@ -2,6 +2,9 @@
 ''' Kivy interface to manage expenses in autonomie
 '''
 import json
+import random
+
+from functools import partial
 
 from ConfigParser import SafeConfigParser
 from kivy.app import App
@@ -12,7 +15,7 @@ from kivy.uix.button import Button
 from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
-from kivy.adapters.simplelistadapter import SimpleListAdapter
+from kivy.adapters.listadapter import ListAdapter
 from kivy.properties import (
                 BooleanProperty,
                 ListProperty,
@@ -48,19 +51,58 @@ class SyncPopup(Popup):
     errors = ListProperty([])
 
 
+class ExpensePool(list):
+    """
+        The pool of expenses, handles the sync status and other
+        particular stuff
+    """
+    ids = []
+
+    def load(self, elements):
+        for elem in json.loads(elements):
+            # We store the ids to be able to handle unicity
+            self.ids.append(elem['local_id'])
+            self.append(elem)
+
+    def add_expense(self, expense_dict):
+        expense_dict['local_id'] = self.get_uniq_id()
+        self.append(expense_dict)
+
+    def tosync(self):
+        return [elem for elem in self if not elem.get('synced', False)]
+
+    def get_list(self):
+        return [elem for elem in self]
+
+    def get_uniq_id(self):
+        temp = random.randint(0, 10000)
+        while temp in self.ids:
+            temp = random.randint(0, 10000)
+        return temp
+
+    def stored_version(self):
+        print self
+        return json.dumps(self)
+
+
 class NdfApp(App):
     ''' #TODO
     '''
     datalist_adapter = ObjectProperty(None)
     settings = ObjectProperty()
+    pool = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(NdfApp, self).__init__(**kwargs)
-        self.datalist = []
-        self.datalist_adapter = SimpleListAdapter(
-            data=self.datalist,
-            cls=ListItemButton,
-            args_converter=self.data_converter)
+        self.pool = ExpensePool()
+#        self.datalist_adapter = ListAdapter(
+#            data=self.pool,
+#            cls=ListItemButton,
+#            args_converter=self.data_converter)
+        self.datalist_adapter = ListAdapter(
+                data=self.pool,
+                cls=ListItemButton,
+                args_converter=self.data_converter)
 
     def get_connection(self):
         """
@@ -149,6 +191,7 @@ class NdfApp(App):
         """
             Fetch options success handler
         """
+        Logger.info("Nd : Get back : %s" % resp)
         if resp.get('status', 'error') == 'success':
             self.store_options(resp.get('result'))
         else:
@@ -161,6 +204,7 @@ class NdfApp(App):
         """
             Error while fetching options
         """
+        Logger.info("Nd : Get back : %s" % resp)
         self.dialog(
                 title=u"Erreur à la configuration",
                 text=u"Une erreur inconnue a été rencontrée lors de la " \
@@ -176,6 +220,51 @@ class NdfApp(App):
         self.settings.set('main', 'expensetypes', json.dumps(options))
         self.property('settings').dispatch(self)
 
+    def sync_datas(self):
+        path = "expenses"
+        conn = self.get_connection()
+
+        for expense in self.pool.tosync():
+            Logger.debug("Ndf : We'd like to sync %s" % expense)
+            success = partial(self.sync_success, expense)
+            conn.request(
+                    path,
+                    expense,
+                    on_success=success,
+                    on_error=self.fetch_options_error)
+
+    def sync_success(self, expense, req, resp):
+        """
+            Successfull syncrhonisation
+        """
+        status = resp.get('status')
+        if status == 'error':
+            self.sync_error(req, resp)
+        else:
+            Logger.info("Ndf : Synchronisation was successfull")
+            Logger.info("Ndf : %s" % resp)
+            expense.update(resp)
+            expense['synced'] = True
+            self.pool_updated()
+            Logger.info("Ndf : %s" % self.pool)
+
+    def sync_error(self, req, resp):
+        """
+            Error while synchronizing
+        """
+        Logger.error("Ndf : Synchronization error")
+        self.dialog("Erreur de synchronisation",
+    u"Une erreur est survenue lors de la synchronisation de vos données")
+
+    def pool_updated(self):
+        """
+            Called when the pool has been updated
+        """
+        Logger.debug("Ndf Pool : pool updated")
+        self.settings.set('main', 'expenses', self.pool.stored_version())
+        self.property('pool').dispatch(self)
+        self.property('datalist_adapter').dispatch(self)
+
     def update_to_sync(self, *args):
         Logger.info('Ndf: FIXME: update_to_sync %s' % args)
 
@@ -187,6 +276,8 @@ class NdfApp(App):
         settings = self.load_settings()
         # need to load config *before* assigning to self.settings
         self.settings = settings
+        self.pool.load(settings.get('main', 'expenses'))
+        self.property('pool').dispatch(self)
         return super(NdfApp, self).build()
 
     def load_settings(self):
@@ -236,22 +327,29 @@ class NdfApp(App):
         return True
 
     def data_converter(self, row_index, element):
-        return {
-            'text': element['title'],
-            'size_hint_y': None,
-            'height': '30sp'
-            }
+        return {'text':'toto', 'size_hint_y': None, 'height': '30sp'}
+#        return {
+#            'text': element['title'],
+#            'size_hint_y': None,
+#            'height': '30sp'
+#            }
 
     def store_expense(self, screen_name):
         manager = self.root.ids.screenmanager
         screen = manager.get_screen(screen_name)
         expense = screen.expense
+        # FIXME : Waiting for a date widget
+        from datetime import date
+        expense['date'] = date.today().isoformat()
+
         # TODO: add validation
         if expense:
             Logger.debug("Ndf : Storing an expense %s" % expense)
-            self.datalist_adapter.data.append(expense)
-            self.property('datalist_adapter').dispatch(self)
+            self.pool.add_expense(expense)
+            self.pool_updated()
+            self.settings.set('main', 'expenses', self.pool.stored_version())
             screen.expense = {}
+
 
 
 class AddScreen(Screen):
@@ -275,6 +373,17 @@ class KmFormScreen(Screen):
     def set_value(self, key, value):
         Logger.debug(u"Ndf : Setting a value for {0} : {1}".format(key, value))
         self.expense[key] = value
+
+    def set_type(self, value, options):
+        """
+            Set the type of the expense
+        """
+        self.set_value('type', value)
+        for option in options:
+            Logger.debug("Ndf : option : %s" % option)
+            if option['label'] == value:
+                self.set_value('type_id', option['value'])
+
 
 
 if __name__ == '__main__':
