@@ -134,7 +134,7 @@ class Connection(EventDispatcher):
             on_error = kwargs.pop('on_error', None)
             on_progress = kwargs.pop('on_progress', None)
 
-            body = JSON_ENCODE(kwargs)
+            body = JSON_ENCODE(req_body)
             url = urlparse.urljoin(base_url, path)
             Logger.info("   + Calling the following url : %s" % url)
 
