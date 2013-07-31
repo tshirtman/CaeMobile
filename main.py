@@ -3,19 +3,22 @@
 '''
 import json
 import random
+import datetime
+import dateutil.parser
 
 from functools import partial
 
 from ConfigParser import SafeConfigParser
 from kivy.app import App
+
 from kivy.logger import Logger
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import (
+        Screen,
+        )
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.uix.listview import ListItemButton
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
-from kivy.adapters.listadapter import ListAdapter
 from kivy.properties import (
                 BooleanProperty,
                 ListProperty,
@@ -25,22 +28,18 @@ from kivy.properties import (
                 DictProperty,
                 )
 from connection import Connection
+from utils import (
+        read_locale_date,
+        write_locale_date,
+        get_base_url,
+        get_action_path_and_method,
+        )
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
 SETTINGSFILE = 'config.ini'
 SETTINGS_FILES = DEFAULTSETTINGSFILE, SETTINGSFILE
 
 __version__ = '0.01'
-
-
-def get_base_url(url):
-    """
-        Return scheme + location
-    """
-    import urlparse
-    result = urlparse.urlsplit(url)
-    scheme = result.scheme or 'http'
-    return "{0}://{1}/".format(scheme, result.netloc)
 
 
 class SyncPopup(Popup):
@@ -59,50 +58,141 @@ class ExpensePool(list):
     ids = []
 
     def load(self, elements):
+        """
+            Load expenses from a json string
+        """
         for elem in json.loads(elements):
             # We store the ids to be able to handle unicity
             self.ids.append(elem['local_id'])
             self.append(elem)
 
+    def merge(self, expense_dict):
+        if expense_dict.has_key('local_id'):
+            return self.update_expense(expense_dict)
+        else:
+            return self.add_expense(expense_dict)
+
     def add_expense(self, expense_dict):
+        """
+            add an expense to our pool
+        """
+        Logger.debug("Ndf : Storing an expense %s" % expense_dict)
         expense_dict['local_id'] = self.get_uniq_id()
         self.append(expense_dict)
+        expense_dict['todo'] = 'add'
+        return expense_dict
+
+    def update_expense(self, expense_dict):
+        """
+            Update an expense
+        """
+        Logger.debug("Ndf : Updating an expense %s" % expense_dict)
+        index, expense = self.get_expense_by_local_id(expense_dict['local_id'])
+        expense.update(expense_dict)
+        expense['todo'] = 'update'
+        expense['synced'] = False
+        return expense
+
+    def del_expense(self, expense_dict):
+        """
+            Ask for expense deletion
+        """
+        index, expense = self.get_expense_by_local_id(expense_dict['local_id'])
+        expense['synced'] = False
+        expense['todo'] = 'delete'
+        return expense
+
+    def remove(self, expense_dict):
+        """
+            Remove an expense from the pool (after deletion)
+        """
+        index, expense = self.get_expense_by_local_id(expense_dict['local_id'])
+        return self.pop(index)
+
+    def get_expense_by_local_id(self, local_id):
+        """
+            Return an expense given its local id
+        """
+        for index, elem in enumerate(self):
+            if elem['local_id'] == local_id:
+                return index, elem
+        # Should not happen
+        return None
 
     def tosync(self):
+        """
+            Return the list of elements to be synchronized
+        """
         return [elem for elem in self if not elem.get('synced', False)]
 
-    def get_list(self):
-        return [elem for elem in self]
-
     def get_uniq_id(self):
+        """
+            Return a unique id
+        """
         temp = random.randint(0, 10000)
         while temp in self.ids:
             temp = random.randint(0, 10000)
         return temp
 
     def stored_version(self):
-        print self
+        """
+            Return this object as a json string
+        """
         return json.dumps(self)
+
+class RestRequest(object):
+    def __init__(self, request, resp):
+        self.request = request
+        self.resp = resp
+        self.code = self.request.resp_status
+        self.success = hasattr(self.resp, 'get') and \
+                self.resp.get('status') == 'success'
+        if hasattr(self.resp, 'get'):
+            self.result = self.resp.get('result', {})
+        else:
+            self.result = {}
+
 
 
 class NdfApp(App):
-    ''' #TODO
-    '''
-    datalist_adapter = ObjectProperty(None)
+    """
+        The main application object
+        Handle the settings and the expense add/edit/delete
+    """
     settings = ObjectProperty()
     pool = ObjectProperty()
 
-    def __init__(self, **kwargs):
-        super(NdfApp, self).__init__(**kwargs)
+    def build(self):
+        """
+            The build method (specific to kivy)
+        """
+        settings = self.load_settings()
+        # need to load config *before* assigning to self.settings
+        self.settings = settings
+
+        self.manager = self.root.ids.screenmanager
+        self.expenses = self.manager.get_screen('expenses')
+
+        self.load_expenses()
+        return self.root
+
+    def load_settings(self):
+        """
+            Load the settings from the ini files
+        """
+        settings = SafeConfigParser()
+        loaded_settings = settings.read(SETTINGS_FILES)
+        Logger.debug("Ndf: loaded settings: %s", loaded_settings)
+        return settings
+
+    def load_expenses(self):
+        """
+            Build our expense pool and pass it to the expenselistscreen
+        """
         self.pool = ExpensePool()
-#        self.datalist_adapter = ListAdapter(
-#            data=self.pool,
-#            cls=ListItemButton,
-#            args_converter=self.data_converter)
-        self.datalist_adapter = ListAdapter(
-                data=self.pool,
-                cls=ListItemButton,
-                args_converter=self.data_converter)
+        self.pool.load(self.settings.get('main', 'expenses'))
+        self.property('pool').dispatch(self)
+        self.expenses.data = self.pool
 
     def get_connection(self):
         """
@@ -115,18 +205,10 @@ class NdfApp(App):
             to_sync=self.settings.items('tosync'),
             )
 
-    def sync(self, *args):
-        ''' Sync the pending expenses to remote server
-        '''
-        self._connection = self.get_connection()
-
-        self.popup = SyncPopup()
-        self.popup.open()
-        self._connection.bind(to_sync=self.update_to_sync)
-        self._connection.bind(errors=self.popup.setter('errors'))
-        self._connection.sync()
-
     def check_configuration(self):
+        """
+            Entry point for app configuration
+        """
         self.check_auth()
 
     def check_auth(self):
@@ -141,9 +223,10 @@ class NdfApp(App):
         """
             Launched if the authentication test succeeded
         """
-        if request.resp_status == 301:
+        rest_req = RestRequest(request, resp)
+        if rest_req.code == 301:
             self.check_auth_redirect(request, resp)
-        elif hasattr(resp, 'get') and resp.get('status') == 'success':
+        elif rest_req.success:
             Logger.info("Ndf : Authentication test succeeded")
             self.fetch_options()
         else:
@@ -191,9 +274,10 @@ class NdfApp(App):
         """
             Fetch options success handler
         """
+        rest_req = RestRequest(request, resp)
         Logger.info("Nd : Get back : %s" % resp)
-        if resp.get('status', 'error') == 'success':
-            self.store_options(resp.get('result'))
+        if rest_req.success:
+            self.store_options(rest_req.result)
         else:
             self.fetch_options_error(request, resp)
         self.dialog(
@@ -221,78 +305,59 @@ class NdfApp(App):
         self.property('settings').dispatch(self)
 
     def sync_datas(self):
+        """
+            Sync the pending expenses to the remote server
+        """
+        # Handle deletion
         path = "expenses"
         conn = self.get_connection()
 
         for expense in self.pool.tosync():
             Logger.debug("Ndf : We'd like to sync %s" % expense)
+            path, method = get_action_path_and_method(expense)
             success = partial(self.sync_success, expense)
             conn.request(
                     path,
                     expense,
                     on_success=success,
-                    on_error=self.fetch_options_error)
+                    on_error=self.fetch_options_error,
+                    method=method)
 
     def sync_success(self, expense, req, resp):
         """
-            Successfull syncrhonisation
+            Successfull synchronisation
         """
-        status = resp.get('status')
-        if status == 'error':
-            self.sync_error(req, resp)
-        else:
+        rest_req = RestRequest(req, resp)
+        if rest_req.success:
             Logger.info("Ndf : Synchronisation was successfull")
             Logger.info("Ndf : %s" % resp)
-            expense.update(resp)
-            expense['synced'] = True
+            if expense['todo'] == 'delete':
+                self.pool.remove(expense)
+            else:
+                expense.update(rest_req.result)
+                expense['synced'] = True
             self.pool_updated()
             Logger.info("Ndf : %s" % self.pool)
+        else:
+            self.sync_error(req, resp)
 
     def sync_error(self, req, resp):
         """
             Error while synchronizing
         """
         Logger.error("Ndf : Synchronization error")
+        Logger.error("Ndf : error code : %s" % req.resp_status)
+        Logger.error("Ndf : %s" % resp)
         self.dialog("Erreur de synchronisation",
     u"Une erreur est survenue lors de la synchronisation de vos données")
 
     def pool_updated(self):
         """
-            Called when the pool has been updated
+            Called when the expense pool has been updated
         """
         Logger.debug("Ndf Pool : pool updated")
         self.settings.set('main', 'expenses', self.pool.stored_version())
         self.property('pool').dispatch(self)
-        self.property('datalist_adapter').dispatch(self)
-
-    def update_to_sync(self, *args):
-        Logger.info('Ndf: FIXME: update_to_sync %s' % args)
-
-    def sync_update(self, *args):
-        self._connection = None
-        Logger.warn("Ndf: FIXME: here, really update")
-
-    def build(self):
-        settings = self.load_settings()
-        # need to load config *before* assigning to self.settings
-        self.settings = settings
-        self.pool.load(settings.get('main', 'expenses'))
-        self.property('pool').dispatch(self)
-        return super(NdfApp, self).build()
-
-    def load_settings(self):
-        settings = SafeConfigParser()
-        loaded_settings = settings.read(SETTINGS_FILES)
-        Logger.debug("Ndf: loaded settings: %s", loaded_settings)
-        return settings
-
-    def get(self, on_success=None, on_error=None, **kwargs):
-        if kwargs:
-            # TODO we want to use kwargs to filter
-            pass
-
-        else:
-            self.request('path')
 
     def dialog(self, title, text):
         """
@@ -326,30 +391,40 @@ class NdfApp(App):
         '''
         return True
 
-    def data_converter(self, row_index, element):
-        return {'text':'toto', 'size_hint_y': None, 'height': '30sp'}
-#        return {
-#            'text': element['title'],
-#            'size_hint_y': None,
-#            'height': '30sp'
-#            }
+    def on_pool(self, *args):
+        Logger.debug("Ndf Pool : The pool update event has been received")
+        if self.expenses is not None:
+            Logger.debug("%s" % self.pool)
+            self.expenses.data = []
+            self.expenses.data = self.pool
 
-    def store_expense(self, screen_name):
-        manager = self.root.ids.screenmanager
-        screen = manager.get_screen(screen_name)
-        expense = screen.expense
-        # FIXME : Waiting for a date widget
-        from datetime import date
-        expense['date'] = date.today().isoformat()
+    def store_expense(self, screen_name, expense):
+        screen = self.manager.get_screen(screen_name)
 
         # TODO: add validation
         if expense:
-            Logger.debug("Ndf : Storing an expense %s" % expense)
-            self.pool.add_expense(expense)
+            self.pool.merge(expense)
             self.pool_updated()
             self.settings.set('main', 'expenses', self.pool.stored_version())
             screen.expense = {}
 
+    def edit_expense(self, index):
+        expense = self.expenses.data[index]
+        name = "expense{0}".format(index)
+        if self.manager.has_screen(name):
+            self.manager.remove_widget(self.manager.get_screen(name))
+
+        view = KmEditFormScreen(
+                name=name,
+                expense=expense)
+        self.manager.add_widget(view)
+        self.manager.transition.direction = 'left'
+        self.manager.current = view.name
+
+    def delete_expense(self, expense):
+        self.pool.del_expense(expense)
+        self.pool_updated()
+        self.settings.set('main', 'expenses', self.pool.stored_version())
 
 
 class AddScreen(Screen):
@@ -366,23 +441,85 @@ class AddScreen(Screen):
         # Reset the spinner to the default value
         self.ndf_type = "Type de frais"
 
+    def edit_expense(self, index):
+        pass
 
-class KmFormScreen(Screen):
+
+class KmAddFormScreen(Screen):
     expense = DictProperty({})
-
-    def set_value(self, key, value):
+    def set_value(self, key, value, *args):
         Logger.debug(u"Ndf : Setting a value for {0} : {1}".format(key, value))
+        Logger.debug("Ndf : Alternative options : {0}".format(args))
+        if hasattr(self, 'on_%s' % key):
+            value = getattr(self, 'on_%s' % key)(value, *args)
         self.expense[key] = value
 
-    def set_type(self, value, options):
+    def on_type(self, value, options):
         """
             Set the type of the expense
         """
-        self.set_value('type', value)
         for option in options:
             Logger.debug("Ndf : option : %s" % option)
             if option['label'] == value:
                 self.set_value('type_id', option['value'])
+                break
+        return value
+
+    def on_date(self, value):
+        """
+            Set the date
+        """
+        Logger.debug("Ndf : Altering the date value")
+        if len(value) != 10:
+            Logger.debug("Ndf : date format is invalid, expecting ddmmyyyy")
+            value = ""
+        else:
+            try:
+                date = read_locale_date(value)
+            except:
+                date = datetime.date.today()
+            value = date.isoformat()
+        return value
+
+    def get_date(self):
+        """
+            return the current date (today as default)
+        """
+        if self.expense.get('date'):
+            date = dateutil.parser.parse(self.expense.get('date'))
+        else:
+            date = datetime.date.today()
+            self.set_value('date', date.isoformat())
+        return write_locale_date(date)
+
+
+class KmEditFormScreen(KmAddFormScreen):
+    """
+        Form used to edit km expenses
+    """
+    pass
+
+
+class ExpenseListItem(BoxLayout):
+    index = NumericProperty()
+    description = StringProperty()
+    todo = StringProperty(allownone=True)
+    synced = BooleanProperty()
+    kmtype = BooleanProperty()
+    date = StringProperty()
+
+
+class ExpenseListScreen(Screen):
+    data = ListProperty()
+
+    def args_converter(self, row_index, item):
+        date = write_locale_date(dateutil.parser.parse(item.get('date')))
+        return {'description': item.get("description", ""),
+                "synced":item.get('synced', False),
+                "todo": item.get('todo', ''),
+                'km_expense': item.has_key('km'),
+                'date': date,
+                'index': row_index}
 
 
 
