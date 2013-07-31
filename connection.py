@@ -44,7 +44,7 @@ class Connection(EventDispatcher):
 
     def base_url(self):
         """
-        returns the url for the application. Value is cached.
+            returns the url for the application. Value is cached.
         """
         if hasattr(self, '_base_url'):
             return self._base_url
@@ -75,6 +75,9 @@ class Connection(EventDispatcher):
 
     def _get_request(self, url, body, on_success, on_error, on_progress=None, \
             **kwargs):
+        """
+            Return a request object based on the passed datas
+        """
         headers = self._get_headers()
         return UrlRequest(
                 url,
@@ -98,8 +101,9 @@ class Connection(EventDispatcher):
 
 
     def request(self, path, req_body, **kwargs):
-        ''' Base method to send requests to server, autoconnect if needed
-        '''
+        """
+            Base method to send requests to server, autoconnect if needed
+        """
         base_url = self.base_url()
         if not self.cookie:
             Logger.info("Ndf: not logged in, authenticating")
@@ -122,7 +126,7 @@ class Connection(EventDispatcher):
                                 "que l'adresse est correcte.")
 
 
-            request = self._get_request(
+            self._get_request(
                     base_url + '/login',
                     body,
                     accept_login,
@@ -138,7 +142,7 @@ class Connection(EventDispatcher):
             url = urlparse.urljoin(base_url, path)
             Logger.info("   + Calling the following url : %s" % url)
 
-            request = self._get_request(
+            self._get_request(
                     url,
                     body,
                     on_success,
@@ -147,52 +151,6 @@ class Connection(EventDispatcher):
                     **kwargs
                     )
 
-        # FIXME remove these requests when they are done
-        self.requests.append(request)
-
-    def send(self, expense):
-        ''' Try to send an expense to the server, if the request success,
-            the expense should be removed from the 'tosync' expenses, else, the
-            error should be displayed.
-        '''
-        self.request(
-                'expenses',
-                method='POST',
-                on_success=partial(self.send_success, expense),
-                on_error=partial(self.send_error, expense),
-                req_body=expense
-                )
-
-    def send_success(self, expense, *args):
-        ''' Take note that the expense was accepted by the server.
-        '''
-        Logger.info("Successfully sent the expense :")
-        Logger.info(expense)
-        Logger.info(args)
-        self.to_sync.pop()
-
-    def send_error(self, expense, *args):
-        ''' Indicate an error to the user, keep the expense in record.
-        '''
-        self.errors.append(expense[0], args)
-
-    def connection_error(self, request, error='Undefined error', *args):
-        '''
-        '''
-        Logger.info(error)
-        self.errors.append(error)
-        Logger.debug('%s' % request)
-
-    def sync(self, *args):
-        ''' Send requests to sync all the pending expenses
-        '''
-        expenses = self.to_sync
-
-        for _id, data  in expenses.items():
-            Logger.info(_id)
-            Logger.info(data)
-            self.send(data)
-
 
     def check_auth(self, success, error):
         """
@@ -200,4 +158,10 @@ class Connection(EventDispatcher):
         """
         url = self.base_url() + '/login'
         body = self._get_credentials()
-        request = self._get_request(url, body, success, error)
+        self._get_request(url, body, success, error)
+
+    def connection_error(self, request, error='Undefined error', *args):
+        Logger.info(error)
+        self.errors.append(error)
+        Logger.debug('%s' % request)
+
