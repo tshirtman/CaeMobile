@@ -1,12 +1,14 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 #:import json json
+#:import ListAdapter kivy.adapters.listadapter.ListAdapter
+#:import Factory kivy.factory.Factory
 #:set small_button_height '40sp'
 
 BoxLayout:
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: None
-        height: '30sp'
+        height: '48sp'
 
         MenuButton:
             source: 'data/sync.png'
@@ -16,30 +18,37 @@ BoxLayout:
             on_press: app.sync_datas()
             disabled: not app.pool or not len(app.pool.tosync())
 
-        MenuButton:
-            source: 'data/icon.png'
 
         MenuButton:
-            source: 'data/icon.png'
+            source: "data/add.png"
+            text: 'Ajouter'
+            on_press:
+                screenmanager.transition.direction = 'left'
+                screenmanager.current = 'add'
+
+        MenuButton:
+            source: 'data/settings.png'
+            text: "Configuration"
+            on_press:
+                screenmanager.transition.direction = 'down'
+                screenmanager.current = 'settings'
+
 
     ScreenManager:
         id: screenmanager
         opacity: 0.9
         transition: SlideTransition()
 
-        MenuScreen:
-            name: 'menu'
+        ExpenseListScreen:
+            name: 'expenses'
 
         AddScreen:
             name: 'add'
 
-        BacklogScreen:
-            name: 'backlog'
-
         SettingsScreen:
             name: 'settings'
 
-        KmFormScreen:
+        KmAddFormScreen:
             name: 'kmform'
 
 
@@ -68,47 +77,6 @@ BoxLayout:
             size_hint_x: None
             width: self.texture_size[0]
 
-<MenuScreen@Screen>:
-    BoxLayout:
-        size_hint: .9, .9
-        pos_hint: {'center_x': .5, 'center_y': .5}
-        orientation: 'vertical'
-
-        Label:
-            canvas.before:
-                Color:
-                    rgba: 0.7, 0.2, 0.35, 1.0
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-            text: 'Notes de frais'
-
-        Widget:
-            size_hint_y: None
-            height: small_button_height
-        Button:
-            text: 'Ajouter'
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'add'
-
-        Widget:
-            size_hint_y: None
-            height: small_button_height
-        Button:
-            text: 'Voir'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'backlog'
-        Widget:
-            size_hint_y: None
-            height: small_button_height
-        Button:
-            text: 'Configuration'
-            on_press:
-                root.manager.transition.direction = 'down'
-                root.manager.current = 'settings'
 
 <SettingsScreen@Screen>:
     BoxLayout:
@@ -119,7 +87,7 @@ BoxLayout:
             text: 'Retour'
             on_press:
                 root.manager.transition.direction = 'up'
-                root.manager.current = 'menu'
+                root.manager.current = 'expenses'
 
         BoxLayout:
             orientation: 'vertical'
@@ -205,7 +173,7 @@ BoxLayout:
             text: 'Retour'
             on_press:
                 root.manager.transition.direction = 'right'
-                root.manager.current = 'menu'
+                root.manager.current = 'expenses'
         Widget:
             size_hint_y: None
             height: small_button_height
@@ -219,7 +187,8 @@ BoxLayout:
 
         Widget:
 
-<KmFormScreen>:
+
+<KmAddFormScreen>:
 
     BoxLayout:
         orientation: 'vertical'
@@ -229,7 +198,16 @@ BoxLayout:
             text: 'Retour'
             on_press:
                 root.manager.transition.direction = 'right'
-                root.manager.current = 'add'
+                root.manager.current = 'expenses'
+
+        Button:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Supprimer'
+            on_press:
+                app.delete_expense(root.expense)
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'expenses'
 
 
         GridLayout:
@@ -266,10 +244,20 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_type(args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
             Label:
-                text: "Date"
-            Widget:
+                text: "Date (jj-mm-AAAA)"
+            TextInput:
+                id: date
+                multiline: False
+                size_hint_y: None
+                height: small_button_height
+                text: root.get_date()
+                on_text_validate:
+                    root.set_value('date', args[0].text)
+                    start.focus = True
+                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             Label:
                 text: "Point de départ"
             TextInput:
@@ -327,26 +315,52 @@ BoxLayout:
                 height: small_button_height
                 text: "Enregistrer"
                 on_press:
-                    app.store_expense('kmform')
+                    app.store_expense(root.name, root.expense)
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'expenses'
 
             Widget:
 
-<BacklogScreen@Screen>:
+<ExpenseListScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
-        Button:
-            size_hint_y: None
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'menu'
-        Label:
-            text: "Liste des notes de frais"
-
         ListView:
-            size_hint: .8,.8
-            adapter: app.datalist_adapter
+            adapter: ListAdapter(data=root.data, cls=Factory.ExpenseListItem, args_converter=root.args_converter)
+
+<ExpenseListItem>:
+    height: '36sp'
+    size_hint_y: None
+
+    canvas:
+        Color:
+            rgb: .3, .3, .3
+        Rectangle:
+            pos: self.pos
+            size: self.width, 1
+
+    BoxLayout:
+
+        padding: '5dp'
+
+        Image:
+            source: 'data/valid_16.png' if root.synced else  'data/edit_16.png' if root.todo in ('update', 'add') else 'data/delete_16.png' if root.todo == 'delete' else ''
+            mipmap: True
+            size_hint_x: None
+            width: self.height
+
+        Label:
+            text: root.date
+
+        Label:
+            text: root.description
+
+        Button:
+            text: '>'
+            size_hint_x: None
+            width: self.height
+            on_release: app.edit_expense(root.index)
+
+
 
 <SyncPopup>:
     size_hint: .9, .5
