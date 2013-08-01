@@ -127,7 +127,7 @@ class Connection(EventDispatcher):
 
 
             self._get_request(
-                    base_url + '/login',
+                    base_url + 'login',
                     body,
                     accept_login,
                     on_error)
@@ -156,7 +156,7 @@ class Connection(EventDispatcher):
         """
             Check authentification and launch the callback
         """
-        url = self.base_url() + '/login'
+        url = self.base_url() + 'login'
         body = self._get_credentials()
         self._get_request(url, body, success, error)
 
