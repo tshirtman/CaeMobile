@@ -1,0 +1,14 @@
+Windows:
+--------
+
+http://kivy.org/docs/guide/packaging-windows.html
+
+Android:
+--------
+
+install buildozer:
+
+http://github.com/kivy/buildozer
+
+buildozer android debug deploy run logcat
+
