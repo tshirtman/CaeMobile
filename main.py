@@ -13,27 +13,27 @@ from kivy.app import App
 
 from kivy.logger import Logger
 from kivy.uix.screenmanager import (
-        Screen,
-        )
+    Screen,
+    )
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import (
-                BooleanProperty,
-                ListProperty,
-                NumericProperty,
-                ObjectProperty,
-                StringProperty,
-                DictProperty,
-                )
+    BooleanProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    StringProperty,
+    DictProperty,
+    )
 from connection import Connection
 from utils import (
-        read_locale_date,
-        write_locale_date,
-        get_base_url,
-        get_action_path_and_method,
-        )
+    read_locale_date,
+    write_locale_date,
+    get_base_url,
+    get_action_path_and_method,
+    )
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
 SETTINGSFILE = 'config.ini'
@@ -67,7 +67,7 @@ class ExpensePool(list):
             self.append(elem)
 
     def merge(self, expense_dict):
-        if expense_dict.has_key('local_id'):
+        if 'local_id' in expense_dict:
             return self.update_expense(expense_dict)
         else:
             return self.add_expense(expense_dict)
@@ -89,7 +89,7 @@ class ExpensePool(list):
         Logger.debug("Ndf : Updating an expense %s" % expense_dict)
         index, expense = self.get_expense_by_local_id(expense_dict['local_id'])
         expense.update(expense_dict)
-        if expense.has_key('id'):
+        if 'id' in expense:
             expense['todo'] = 'update'
         expense['synced'] = False
         return expense
@@ -141,6 +141,7 @@ class ExpensePool(list):
         """
         return json.dumps(self)
 
+
 class RestRequest(object):
     def __init__(self, request, resp):
         self.request = request
@@ -191,7 +192,6 @@ class NdfApp(App):
             if not self.settings.get('settings', key):
                 return False
         return True
-
 
     def load_settings(self):
         """
@@ -255,9 +255,9 @@ class NdfApp(App):
             Launched if the authentication test failed
         """
         self.dialog(
-                title=u"Erreur d'authentification",
-                text=u"Veuillez vérifier votre configuration"
-                )
+            title=u"Erreur d'authentification",
+            text=u"Veuillez vérifier votre configuration"
+            )
 
     def check_auth_redirect(self, request, resp):
         """
@@ -284,10 +284,10 @@ class NdfApp(App):
         success = partial(self.fetch_options_success, silent)
         error = partial(self.fetch_options_error, silent)
         conn.request(
-                path,
-                {},
-                on_success=success,
-                on_error=error)
+            path,
+            {},
+            on_success=success,
+            on_error=error)
 
     def fetch_options_success(self, silent, request, resp):
         """
@@ -312,8 +312,8 @@ class NdfApp(App):
         if not silent:
             self.dialog(
                 title=u"Erreur à la configuration",
-                text=u"Une erreur inconnue a été rencontrée lors de la " \
-                        "configuration de l'application.")
+                text=u"Une erreur inconnue a été rencontrée lors de la "
+                      "configuration de l'application.")
 
     def store_options(self, options):
         """
@@ -330,7 +330,7 @@ class NdfApp(App):
             Sync the pending expenses to the remote server
         """
         # Handle deletion
-        path = "expenses"
+        #path = "expenses"
         conn = self.get_connection()
 
         self.fetch_options(silent=True)
@@ -349,11 +349,11 @@ class NdfApp(App):
         success = partial(self.sync_success, expense)
         error = partial(self.sync_error, expense)
         conn.request(
-                path,
-                expense,
-                on_success=success,
-                on_error=error,
-                method=method)
+            path,
+            expense,
+            on_success=success,
+            on_error=error,
+            method=method)
 
     def sync_success(self, expense, req, resp):
         """
@@ -395,14 +395,15 @@ class NdfApp(App):
                 return
         elif rest_req.status == 'error':
             errors = rest_req.resp
-            msg = u"Une erreur est survenue lors de la synchronisation de \
-vos données"
+            msg = u"Une erreur est survenue lors de la synchronisation de " \
+                  u"vos données"
             for key, value in rest_req.errors.items():
                 msg += u'\n'
                 msg += u"{key} : {value}".format(key=key, value=value)
         else:
-            msg = u"Une erreur inconnue est survenue lors de la \
-                    synchronisation de vos données : \n %s" % resp
+            msg = u"Une erreur inconnue est survenue lors de la " \
+                  u"synchronisation de vos données : \n %s" % resp
+
         self.dialog("Erreur de synchronisation", msg)
 
     def pool_updated(self):
@@ -421,7 +422,7 @@ vos données"
         content.add_widget(Label(text=text))
         btnclose = Button(text="Fermer")
         content.add_widget(btnclose)
-        popup_ = Popup( title=title, content=content )
+        popup_ = Popup(title=title, content=content)
         btnclose.bind(on_release=popup_.dismiss)
         popup_.open()
 
@@ -469,14 +470,14 @@ vos données"
         if self.manager.has_screen(name):
             self.manager.remove_widget(self.manager.get_screen(name))
 
-        if expense.has_key('start'):
+        if 'start' in expense:
             form = KmEditFormScreen
         else:
             form = CommonEditFormScreen
 
         view = form(
-                name=name,
-                expense=expense)
+            name=name,
+            expense=expense)
         self.manager.add_widget(view)
         self.manager.transition.direction = 'left'
         self.manager.current = view.name
@@ -489,6 +490,7 @@ vos données"
 
 class ExpenseFormScreen(Screen):
     expense = DictProperty({})
+
     def set_value(self, key, value, *args):
         Logger.debug(u"Ndf : Setting a value for {0} : {1}".format(key, value))
         Logger.debug("Ndf : Alternative options : {0}".format(args))
@@ -538,14 +540,17 @@ class ExpenseFormScreen(Screen):
 class KmAddFormScreen(ExpenseFormScreen):
     pass
 
+
 class KmEditFormScreen(ExpenseFormScreen):
     """
         Form used to edit km expenses
     """
     pass
 
+
 class CommonAddFormScreen(ExpenseFormScreen):
     pass
+
 
 class CommonEditFormScreen(ExpenseFormScreen):
     pass
@@ -566,12 +571,11 @@ class ExpenseListScreen(Screen):
     def args_converter(self, row_index, item):
         date = write_locale_date(dateutil.parser.parse(item.get('date')))
         return {'description': item.get("description", ""),
-                "synced":item.get('synced', False),
+                "synced": item.get('synced', False),
                 "todo": item.get('todo', ''),
-                'km_expense': item.has_key('km'),
+                'km_expense': 'km' in item,
                 'date': date,
                 'index': row_index}
-
 
 
 if __name__ == '__main__':

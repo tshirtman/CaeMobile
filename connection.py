@@ -7,7 +7,7 @@ import urlparse
 from kivy.network.urlrequest import UrlRequest
 from kivy.event import EventDispatcher
 from kivy.properties import (
-        ObjectProperty, StringProperty, DictProperty, ListProperty)
+    ObjectProperty, StringProperty, DictProperty, ListProperty)
 from kivy.logger import Logger
 
 from functools import partial
@@ -17,6 +17,7 @@ JSON_ENCODE = JSONEncoder().encode
 JSON_DECODE = JSONDecoder().raw_decode
 
 API_PATH = '/api/v1/'
+
 
 class Connection(EventDispatcher):
     ''' see module config
@@ -38,9 +39,9 @@ class Connection(EventDispatcher):
             self.request(path, **kwargs)
         else:
             self.connection_error(
-                    request,
-                    error='Erreur de connection, merci de vérifier vos'
-                          'identifiants\n')
+                request,
+                error='Erreur de connection, merci de vérifier vos'
+                      'identifiants\n')
 
     def base_url(self):
         """
@@ -53,8 +54,9 @@ class Connection(EventDispatcher):
         base_url = urlparse.urljoin(self.server, API_PATH)
 
         if any(base_url.startswith(scheme)
-            for scheme in ('http://', 'https://')):
-            self._base_url = base_url
+               for scheme in ('http://', 'https://')
+               ):
+                self._base_url = base_url
         else:
             self._base_url = 'http://%s' % base_url
 
@@ -66,27 +68,27 @@ class Connection(EventDispatcher):
             Return the headers used to request the remote rest api
         """
         headers = {'Content-type': 'text/json',
-                'Accept': 'text/json',
-                'X-Requested-With':'XMLHttpRequest'
-                }
+                   'Accept': 'text/json',
+                   'X-Requested-With': 'XMLHttpRequest'}
+
         if self.cookie is not None:
             headers["Cookie"] = self.cookie
         return headers
 
-    def _get_request(self, url, body, on_success, on_error, on_progress=None, \
-            **kwargs):
+    def _get_request(self, url, body, on_success, on_error, on_progress=None,
+                     **kwargs):
         """
             Return a request object based on the passed datas
         """
         headers = self._get_headers()
         return UrlRequest(
-                url,
-                req_body=body,
-                req_headers=headers,
-                on_success=on_success,
-                on_error=on_error,
-                on_progress=on_progress,
-                **kwargs)
+            url,
+            req_body=body,
+            req_headers=headers,
+            on_success=on_success,
+            on_error=on_error,
+            on_progress=on_progress,
+            **kwargs)
 
     def _get_credentials(self):
         """
@@ -94,11 +96,10 @@ class Connection(EventDispatcher):
         """
         Logger.debug("Credentials : {0} {1}".format(self.login, self.password))
         return JSON_ENCODE({
-                'login': self.login,
-                'password': self.password,
-                'submit': 'submit', # reserved for future use
-                })
-
+            'login': self.login,
+            'password': self.password,
+            'submit': 'submit',  # reserved for future use
+            })
 
     def request(self, path, req_body, **kwargs):
         """
@@ -114,24 +115,23 @@ class Connection(EventDispatcher):
             Logger.info(body)
 
             accept_login = partial(
-                    self.auth_redirect,
-                    path,
-                    req_body=req_body,
-                    #on_progress=Logger.info,
-                    **kwargs
-                    )
-            on_error = partial(self.connection_error,
-                        error=r"Impossible de contacter le serveur renseigné "\
-                                "dans la configuration, veuillez vérifier "\
-                                "que l'adresse est correcte.")
-
+                self.auth_redirect,
+                path,
+                req_body=req_body,
+                #on_progress=Logger.info,
+                **kwargs
+                )
+            on_error = partial(
+                self.connection_error,
+                error=r"Impossible de contacter le serveur renseigné "
+                      r"dans la configuration, veuillez vérifier "
+                      r"que l'adresse est correcte.")
 
             self._get_request(
-                    base_url + 'login',
-                    body,
-                    accept_login,
-                    on_error)
-
+                base_url + 'login',
+                body,
+                accept_login,
+                on_error)
 
         else:
             on_success = kwargs.pop('on_success', None)
@@ -143,14 +143,13 @@ class Connection(EventDispatcher):
             Logger.info("   + Calling the following url : %s" % url)
 
             self._get_request(
-                    url,
-                    body,
-                    on_success,
-                    on_error,
-                    on_progress,
-                    **kwargs
-                    )
-
+                url,
+                body,
+                on_success,
+                on_error,
+                on_progress,
+                **kwargs
+                )
 
     def check_auth(self, success, error):
         """
@@ -164,4 +163,3 @@ class Connection(EventDispatcher):
         Logger.info(error)
         self.errors.append(error)
         Logger.debug('%s' % request)
-
