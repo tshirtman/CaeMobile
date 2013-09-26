@@ -321,17 +321,22 @@ BoxLayout:
 
             Widget:
             Widget:
-            Button:
-                id: valid
+            Widget:
                 size_hint_y: None
                 height: small_button_height
-                text: "Enregistrer"
-                on_press:
-                    app.store_expense(root.name, root.expense)
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'expenses'
+                Button:
+                    id: valid
+                    text: "Enregistrer"
+                    height: self.parent.height
+                    width: self.parent.width + colspan1.width
+                    pos: self.parent.pos
+                    on_press:
+                        app.store_expense(root.name, root.expense)
+                        root.manager.transition.direction = 'right'
+                        root.manager.current = 'expenses'
 
             Widget:
+                id: colspan1
 
 
 <KmAddFormScreen>:
@@ -445,17 +450,22 @@ BoxLayout:
 
             Widget:
             Widget:
-            Button:
-                id: valid
+            Widget:
                 size_hint_y: None
                 height: small_button_height
-                text: "Enregistrer"
-                on_press:
-                    app.store_expense(root.name, root.expense)
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'expenses'
+                Button:
+                    id: valid
+                    text: "Enregistrer"
+                    height: self.parent.height
+                    width: self.parent.width + colspan1.width
+                    pos: self.parent.pos
+                    on_press:
+                        app.store_expense(root.name, root.expense)
+                        root.manager.transition.direction = 'right'
+                        root.manager.current = 'expenses'
 
             Widget:
+                id: colspan1
 
 <CommonAddFormScreen>:
 
@@ -555,17 +565,23 @@ BoxLayout:
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
             Widget:
             Widget:
-            Button:
-                id: valid
+            Widget:
                 size_hint_y: None
                 height: small_button_height
-                text: "Enregistrer"
-                on_press:
-                    app.store_expense(root.name, root.expense)
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'expenses'
+                Button:
+                    id: valid
+                    text: "Enregistrer"
+                    height: self.parent.height
+                    width: self.parent.width + colspan1.width
+                    pos: self.parent.pos
+                    on_press:
+                        app.store_expense(root.name, root.expense)
+                        root.manager.transition.direction = 'right'
+                        root.manager.current = 'expenses'
+
 
             Widget:
+                id: colspan1
 
 <CommonEditFormScreen>:
 
@@ -674,18 +690,22 @@ BoxLayout:
                 on_focus: if not self.focus: self.dispatch('on_text_validate')
             Widget:
             Widget:
-            Button:
-                id: valid
+            Widget:
                 size_hint_y: None
                 height: small_button_height
-                text: "Enregistrer"
-                on_press:
-                    app.store_expense(root.name, root.expense)
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'expenses'
+                Button:
+                    id: valid
+                    text: "Enregistrer"
+                    height: self.parent.height
+                    width: self.parent.width + colspan1.width
+                    pos: self.parent.pos
+                    on_press:
+                        app.store_expense(root.name, root.expense)
+                        root.manager.transition.direction = 'right'
+                        root.manager.current = 'expenses'
 
             Widget:
-
+                id: colspan1
 
 <ExpenseListScreen@Screen>:
     BoxLayout:
