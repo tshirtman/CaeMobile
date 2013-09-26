@@ -19,6 +19,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
+from kivy.factory import Factory
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -419,10 +420,12 @@ class NdfApp(App):
             Fires a simple dialog popup
         """
         content = BoxLayout(orientation='vertical')
-        content.add_widget(Label(text=text))
-        btnclose = Button(text="Fermer")
+        content.add_widget(Factory.NormalLabel(text=text))
+        btnclose = Factory.NormalButton(text="Fermer",
+                                        size_hint_y=None,
+                                        height='40sp')
         content.add_widget(btnclose)
-        popup_ = Popup(title=title, content=content)
+        popup_ = Factory.NormalPopup(title=title, content=content)
         btnclose.bind(on_release=popup_.dismiss)
         popup_.open()
 
