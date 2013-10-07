@@ -334,10 +334,14 @@ class NdfApp(App):
         #path = "expenses"
         conn = self.get_connection()
 
+        Logger.info("Fetching server options")
         self.fetch_options(silent=True)
+        Logger.info("Done fetching options")
 
+        Logger.info("Sending expense updates")
         for expense in self.pool.tosync():
             self.sync_expense(expense, conn=conn)
+
 
     def sync_expense(self, expense, conn=None):
         """
