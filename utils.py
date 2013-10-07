@@ -54,6 +54,7 @@ def get_action_path_and_method(expense_dict):
         path = 'expenses/{id}'.format(id=expense_dict['id'])
     elif expense_dict['todo'] == 'delete':
         method = 'DELETE'
-        path = 'expenses/{id}'.format(id=expense_dict['id'])
+        exp_id = expense_dict.get('id', '00')
+        path = 'expenses/{id}'.format(id=exp_id)
     return path, method
 
