@@ -599,7 +599,7 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
             TextInput:
@@ -723,7 +723,7 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
             TextInput:
