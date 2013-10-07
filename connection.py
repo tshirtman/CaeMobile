@@ -33,7 +33,6 @@ class Connection(EventDispatcher):
     def auth_redirect(self, path, request, result, **kwargs):
         ''' This should be called when a connection request succeed
         '''
-        Logger.info("Ndf: Must authenticate: %s")
         self.cookie = request.resp_headers.get('set-cookie')
         if result['status'] == 'success':
             self.request(path, **kwargs)
