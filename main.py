@@ -349,7 +349,7 @@ class NdfApp(App):
         """
         if conn is None:
             conn = self.get_connection()
-        Logger.debug("Ndf : We'd like to sync %s" % expense)
+        Logger.debug("Ndf : Syncing %s", expense)
         path, method = get_action_path_and_method(expense)
         success = partial(self.sync_success, expense)
         error = partial(self.sync_error, expense)
@@ -359,6 +359,7 @@ class NdfApp(App):
             on_success=success,
             on_error=error,
             method=method)
+        Logger.debug("Done syncing %s", expense)
 
     def sync_success(self, expense, req, resp):
         """
