@@ -13,7 +13,7 @@ package.domain = fr.majerti
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,ini
 
 # (list) Source files to exclude (let empty to not excluding anything)
 #source.exclude_exts = spec
@@ -26,7 +26,7 @@ version.filename = %(source.dir)s/main.py
 # version = 1.2.0
 
 # (list) Application requirements
-requirements = kivy
+requirements = kivy,python-dateutil
 
 # (str) Presplash of the application
 presplash.filename = %(source.dir)s/data/presplash.png
