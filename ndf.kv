@@ -195,46 +195,34 @@ BoxLayout:
                     text: 'Serveur'
                     size_hint_y: None
                     height: small_button_height
-                TextInput:
-                    multiline: False
-                    size_hint_y: None
-                    height: small_button_height
+                FormTextInput:
                     text: app.settings and app.settings.get('settings', 'server') or ''
                     on_text_validate:
                         app.settings.set('settings', 'server', args[0].text)
                         login.focus = True
-                    on_focus: if not self.focus: self.dispatch('on_text_validate')
 
                 NormalLabel:
                     text: 'login'
                     size_hint_y: None
                     height: small_button_height
-                TextInput:
+                FormTextInput:
                     id: login
-                    multiline: False
-                    size_hint_y: None
-                    height: small_button_height
                     text: app.settings and app.settings.get('settings', 'login') or ''
                     on_text_validate:
                         app.settings.set('settings', 'login', args[0].text)
                         password.focus = True
-                    on_focus: if not self.focus: self.dispatch('on_text_validate')
 
                 NormalLabel:
                     size_hint_y: None
                     height: small_button_height
                     text: 'password'
 
-                TextInput:
+                FormTextInput:
                     id: password
-                    size_hint_y: None
-                    height: small_button_height
-                    multiline: False
                     text: app.settings and app.settings.get('settings', 'password') or ''
                     on_text_validate:
                         app.settings.set('settings', 'password', args[0].text)
                     password: True
-                    on_focus: if not self.focus: self.dispatch('on_text_validate')
 
                 NormalLabel:
                     size_hint_y: None
@@ -347,65 +335,52 @@ BoxLayout:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            TextInput:
+            FormTextInput:
                 id: date
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.get_date()
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('date', args[0].text)
                     start.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             NormalLabel:
                 text: "Point de départ"
-            TextInput:
+            FormTextInput:
                 id: start
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('start') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('start', args[0].text)
                     end.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Point d'arrivée"
-            TextInput:
+            FormTextInput:
                 id: end
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('end') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('end', args[0].text)
                     ht.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Nombre de kilomètres"
-            TextInput:
+            FormTextInput:
                 id: ht
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('km') or ""
                 on_text_validate:
                     root.set_value('km', args[0].text)
                     description.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Description"
-            TextInput:
+            FormTextInput:
                 id: description
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('description') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('description', args[0].text)
                     valid.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             Widget:
             Widget:
@@ -475,65 +450,53 @@ BoxLayout:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            TextInput:
+            FormTextInput:
                 id: date
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.get_date()
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('date', args[0].text)
                     start.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             NormalLabel:
                 text: "Point de départ"
-            TextInput:
+            FormTextInput:
                 id: start
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('start') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('start', args[0].text)
                     end.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Point d'arrivée"
-            TextInput:
+            FormTextInput:
                 id: end
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('end') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('end', args[0].text)
                     ht.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Nombre de kilomètres"
-            TextInput:
+            FormTextInput:
                 id: ht
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('km') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('km', args[0].text)
                     description.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Description"
-            TextInput:
+            FormTextInput:
                 id: description
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('description') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('description', args[0].text)
                     valid.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             Widget:
             Widget:
@@ -546,6 +509,7 @@ BoxLayout:
                     height: self.parent.height
                     width: self.parent.width + colspan1.width
                     pos: self.parent.pos
+                    disabled: not (root.expense and root.expense.get('type'))
                     on_press:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
@@ -602,53 +566,44 @@ BoxLayout:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            TextInput:
+            FormTextInput:
                 id: date
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.get_date()
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('date', args[0].text)
                     description.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Description"
-            TextInput:
+            FormTextInput:
                 id: description
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('description') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('description', args[0].text)
                     ht.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             NormalLabel:
                 text: "Montant HT"
-            TextInput:
+            FormTextInput:
                 id: ht
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('ht') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('ht', args[0].text)
                     tva.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Montant de la TVA"
-            TextInput:
+            FormTextInput:
                 id: tva
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('tva') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('tva', args[0].text)
                     valid.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             Widget:
             Widget:
             Widget:
@@ -660,6 +615,7 @@ BoxLayout:
                     height: self.parent.height
                     width: self.parent.width + colspan1.width
                     pos: self.parent.pos
+                    disabled: not (root.expense and root.expense.get('type'))
                     on_press:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
@@ -726,53 +682,44 @@ BoxLayout:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            TextInput:
+            FormTextInput:
                 id: date
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.get_date()
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('date', args[0].text)
                     description.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Description"
-            TextInput:
+            FormTextInput:
                 id: description
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('description') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('description', args[0].text)
                     ht.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
 
             NormalLabel:
                 text: "Montant HT"
-            TextInput:
+            FormTextInput:
                 id: ht
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('ht') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('ht', args[0].text)
                     tva.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             NormalLabel:
                 text: "Montant de la TVA"
-            TextInput:
+            FormTextInput:
                 id: tva
-                multiline: False
-                size_hint_y: None
-                height: small_button_height
                 text: root.expense and root.expense.get('tva') or ""
+                disabled: not (root.expense and root.expense.get('type'))
                 on_text_validate:
                     root.set_value('tva', args[0].text)
                     valid.focus = True
-                on_focus: if not self.focus: self.dispatch('on_text_validate')
+
             Widget:
             Widget:
             Widget:
@@ -784,6 +731,7 @@ BoxLayout:
                     height: self.parent.height
                     width: self.parent.width + colspan1.width
                     pos: self.parent.pos
+                    disabled: not (root.expense and root.expense.get('type'))
                     on_press:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
@@ -899,3 +847,10 @@ BoxLayout:
     separator_color: backround_color
     background: 'data/rounded-border.png'
     border: 4, 4, 4, 4
+
+
+<FormTextInput@TextInput>:
+    multiline: False
+    size_hint_y: None
+    height: small_button_height
+    on_focus: if not self.focus: self.dispatch('on_text_validate')
