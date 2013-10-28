@@ -195,44 +195,35 @@ BoxLayout:
                     text: 'Serveur'
                     size_hint_y: None
                     height: small_button_height
-                FormTextInput:
-                    text: app.settings and app.settings.get('settings', 'server') or ''
-                    on_text_validate:
-                        app.settings.set('settings', 'server', args[0].text)
-                        login.focus = True
+                SettingFormTextInput:
+                    setting: 'server'
+                    next_form: login
 
                 NormalLabel:
                     text: 'login'
                     size_hint_y: None
                     height: small_button_height
-                FormTextInput:
+                SettingFormTextInput:
                     id: login
-                    text: app.settings and app.settings.get('settings', 'login') or ''
-                    on_text_validate:
-                        app.settings.set('settings', 'login', args[0].text)
-                        password.focus = True
+                    setting: 'login'
+                    next_form: password
 
                 NormalLabel:
                     size_hint_y: None
                     height: small_button_height
                     text: 'password'
 
-                FormTextInput:
+                SettingFormTextInput:
                     id: password
-                    text: app.settings and app.settings.get('settings', 'password') or ''
-                    on_text_validate:
-                        app.settings.set('settings', 'password', args[0].text)
+                    setting: 'password'
                     password: True
 
                 NormalLabel:
                     size_hint_y: None
                     height: small_button_height
                     text: 'sync on wifi only'
-                Switch:
-                    size_hint_y: None
-                    height: small_button_height
-                    active: app.settings and app.settings.get('settings', 'sync_wifi') == 'True' or False
-                    on_active: app.settings.set('settings', 'sync_wifi', str(args[1]))
+                SettingSwitch:
+                    setting: 'sync_wifi'
 
             Widget:
 
@@ -854,3 +845,18 @@ BoxLayout:
     size_hint_y: None
     height: small_button_height
     on_focus: if not self.focus: self.dispatch('on_text_validate')
+
+<SettingFormTextInput@FormTextInput>:
+    setting: ''
+    next_form: None
+    text: app.settings and self.setting and app.settings.get('settings', self.setting) or ''
+    on_text_validate:
+        app.settings.set('settings', self.setting, args[0].text)
+        if self.next_form: self.next_form.focus = True
+
+<SettingSwitch@Switch>:
+    setting: ''
+    size_hint_y: None
+    height: small_button_height
+    active: app.settings and self.setting and app.settings.get('settings', self.setting) == 'True' or False
+    on_active: app.settings.set('settings', self.setting, str(args[1]))
