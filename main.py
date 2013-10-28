@@ -15,8 +15,6 @@ from kivy.logger import Logger
 from kivy.uix.screenmanager import (
     Screen,
     )
-from kivy.uix.label import Label
-from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory
@@ -342,7 +340,6 @@ class NdfApp(App):
         for expense in self.pool.tosync():
             self.sync_expense(expense, conn=conn)
 
-
     def sync_expense(self, expense, conn=None):
         """
             Sync the given expense
@@ -400,7 +397,7 @@ class NdfApp(App):
                 self.sync_expense(expense)
                 return
         elif rest_req.status == 'error':
-            errors = rest_req.resp
+            #errors = rest_req.resp
             msg = u"Une erreur est survenue lors de la synchronisation de " \
                   u"vos données"
             for key, value in rest_req.errors.items():
