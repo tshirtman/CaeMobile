@@ -105,6 +105,7 @@ BoxLayout:
     color: text_color_dark
 
 <-NormalButton@Button>:
+    size_hint_y: None
     backround: ''
     backround_down: ''
     color: text_color_light
@@ -177,7 +178,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            size_hint_y: None
             height: small_button_height
             text: 'Retour'
             on_press:
@@ -228,7 +228,6 @@ BoxLayout:
             Widget:
 
             NormalButton:
-                size_hint_y: None
                 height: small_button_height
                 text: "Configurer"
                 on_press:
@@ -238,7 +237,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            size_hint_y: None
             height: small_button_height
             text: 'Retour'
             on_press:
@@ -249,7 +247,6 @@ BoxLayout:
             height: small_button_height
 
         NormalButton:
-            size_hint_y: None
             height: '60dp'
             text: 'Frais divers'
             on_press:
@@ -259,7 +256,6 @@ BoxLayout:
             size_hint_y: None
 
         NormalButton:
-            size_hint_y: None
             height: '60dp'
             text: 'Frais kilométriques'
             on_press:
@@ -272,7 +268,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            size_hint_y: None
             height: small_button_height
             text: 'Retour'
             on_press:
@@ -297,6 +292,7 @@ BoxLayout:
                 text: "Catégorie de frais"
                 size_hint_y: None
                 height: small_button_height
+
             BoxLayout:
                 orientation: 'vertical'
                 NormalToggleButton:
@@ -317,61 +313,64 @@ BoxLayout:
                 text: "Type de frais"
                 size_hint_y: None
                 height: small_button_height
+
             NormalSpinner:
-                text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
-                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes')] or []
+                text:
+                    root.expense and root.expense.get('type') or u'S\xe9lectionner'
+                values:
+                    (
+                    app.settings and [opt['label'].decode('utf-8') for opt in
+                    json.loads(app.settings.get('main',
+                    'expensetypes')).get('kmtypes')] or []
+                    )
+
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    (
+                    root.set_value('type', args[0].text,
+                    json.loads(app.settings.get('main',
+                    'expensetypes')).get('kmtypes'))
+                    )
+
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: date
                 text: root.get_date()
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('date', args[0].text)
-                    start.focus = True
+                expense: root.expense
+                next_form: start
 
             NormalLabel:
                 text: "Point de départ"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: start
-                text: root.expense and root.expense.get('start') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('start', args[0].text)
-                    end.focus = True
+                attribute: 'start'
+                expense: root.expense
+                next_form: end
 
             NormalLabel:
                 text: "Point d'arrivée"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: end
-                text: root.expense and root.expense.get('end') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('end', args[0].text)
-                    ht.focus = True
+                attribute: 'end'
+                expense: root.exense
+                next_form: ht
 
             NormalLabel:
                 text: "Nombre de kilomètres"
             FormTextInput:
                 id: ht
-                text: root.expense and root.expense.get('km') or ""
-                on_text_validate:
-                    root.set_value('km', args[0].text)
-                    description.focus = True
+                attribute: 'km'
+                expense: root.exense
+                next_form: description
 
             NormalLabel:
                 text: "Description"
             FormTextInput:
                 id: description
-                text: root.expense and root.expense.get('description') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('description', args[0].text)
-                    valid.focus = True
+                attribute: 'description'
+                expense: root.expense
 
             Widget:
             Widget:
@@ -388,6 +387,11 @@ BoxLayout:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
                         root.manager.current = 'expenses'
+                        date.text = ''
+                        start.text = ''
+                        end.text = ''
+                        ht.text = ''
+                        description.text = ''
 
             Widget:
                 id: colspan1
@@ -397,7 +401,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            size_hint_y: None
             height: small_button_height
             text: 'Retour'
             on_press:
@@ -505,6 +508,12 @@ BoxLayout:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
                         root.manager.current = 'expenses'
+                        root.expense = {}
+                        date.text = ''
+                        start.text = ''
+                        end.text = ''
+                        ht.text = ''
+                        description.text = ''
 
             Widget:
                 id: colspan1
@@ -513,7 +522,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            size_hint_y: None
             height: small_button_height
             text: 'Retour'
             on_press:
@@ -611,6 +619,11 @@ BoxLayout:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
                         root.manager.current = 'expenses'
+                        root.expense = {}
+                        date.text = ''
+                        description.text = ''
+                        ht.text = ''
+                        tva.text = ''
 
 
             Widget:
@@ -727,6 +740,10 @@ BoxLayout:
                         app.store_expense(root.name, root.expense)
                         root.manager.transition.direction = 'right'
                         root.manager.current = 'expenses'
+                        date.text = ''
+                        description.text = ''
+                        ht.text = ''
+                        tva.text = ''
 
             Widget:
                 id: colspan1
@@ -769,6 +786,7 @@ BoxLayout:
             text: root.description
 
         NormalButton:
+            size_hint_y: 1
             text: '>'
             size_hint_x: None
             width: self.height
@@ -860,3 +878,13 @@ BoxLayout:
     height: small_button_height
     active: app.settings and self.setting and app.settings.get('settings', self.setting) == 'True' or False
     on_active: app.settings.set('settings', self.setting, str(args[1]))
+
+<ExpenseFormTextInput@FormTextInput>:
+    attribute: ''
+    expense: None
+    next_form: None
+    text: root.expense and root.expense.get(attribute)
+    disabled: not (root.expense and root.expense.get('type'))
+    on_text_validate:
+        root.set_value('date', args[0].text)
+        start.focus = True
