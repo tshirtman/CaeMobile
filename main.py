@@ -34,6 +34,7 @@ from utils import (
     write_locale_date,
     get_base_url,
     get_action_path_and_method,
+    filter_expenses,
     )
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
@@ -537,21 +538,11 @@ class NdfApp(App):
             'km',
             'start',
             'tva',
-            'type',
             'type_id',
             )
 
-        for e in self.expenses.data:
-            f = lambda x: cmp_attribute(x, expense, e)
-            if all(map(f, keys)):
-                yield {k: e.get(k) for k in keys}
-
-
-def cmp_attribute(attr, e1, e2):
-    if not e1.get(attr):
-        return True
-
-    return e1[attr] == e2.get(attr)
+        for e in filter_expenses(expense, self.expenses.data, keys):
+            yield e
 
 
 class ExpenseFormScreen(Screen):

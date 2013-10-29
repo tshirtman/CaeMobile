@@ -58,3 +58,16 @@ def get_action_path_and_method(expense_dict):
         path = 'expenses/{id}'.format(id=exp_id)
     return path, method
 
+
+def filter_expenses(expense, expenses, keys):
+    for e in expenses:
+        f = lambda x: cmp_attribute(x, expense, e)
+        if all(map(f, keys)):
+            yield {k: e.get(k) for k in keys}
+
+
+def cmp_attribute(attr, e1, e2):
+    if not attr in e1:
+        return True
+
+    return e1[attr] == e2.get(attr)
