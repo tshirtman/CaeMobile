@@ -16,8 +16,10 @@ from kivy.uix.screenmanager import (
     Screen,
     )
 from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory
+from kivy.clock import Clock
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -47,6 +49,34 @@ class SyncPopup(Popup):
     progress = NumericProperty(0)
     done = BooleanProperty(False)
     errors = ListProperty([])
+
+
+class SelectPrefilPopup(Popup):
+    entries = ListProperty([])
+
+    def on_entries(self, *args):
+        # we may be not open yet, delay to next frame
+        Clock.schedule_once(self.populate, 0)
+
+    def populate(self, *args):
+        print self.entries
+        self.ids.container.clear_widgets()
+
+        for e in self.entries:
+            self.ids.container.add_widget(
+                Factory.PrefilEntry(entry=e, popup=self))
+
+
+class PrefilEntry(Button):
+    entry = ObjectProperty(None)
+    popup = ObjectProperty(None)
+
+    def on_press(self, *args):
+        for a in self.entry:
+            w = App.get_running_app().manager.current_screen.ids
+            if hasattr(w, a):
+                getattr(w, a).text = self.entry.get(a)
+        self.popup.dismiss()
 
 
 class ExpensePool(list):
@@ -165,6 +195,7 @@ class NdfApp(App):
     """
     settings = ObjectProperty()
     pool = ObjectProperty()
+    expenses = ObjectProperty()
 
     def build(self):
         """
@@ -491,6 +522,36 @@ class NdfApp(App):
         self.pool.del_expense(expense)
         self.pool_updated()
         self.settings.set('main', 'expenses', self.pool.stored_version())
+
+    def select_expenses(self, expense):
+        """returns a list of expenses with the same caracteristics as
+        the passed one
+        """
+        if not self.expenses:
+            return
+
+        keys = (
+            'category',
+            'end',
+            'ht',
+            'km',
+            'start',
+            'tva',
+            'type',
+            'type_id',
+            )
+
+        for e in self.expenses.data:
+            f = lambda x: cmp_attribute(x, expense, e)
+            if all(map(f, keys)):
+                yield {k: e.get(k) for k in keys}
+
+
+def cmp_attribute(attr, e1, e2):
+    if not e1.get(attr):
+        return True
+
+    return e1[attr] == e2.get(attr)
 
 
 class ExpenseFormScreen(Screen):
