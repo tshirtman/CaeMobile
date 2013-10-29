@@ -73,10 +73,7 @@ class PrefilEntry(Button):
     popup = ObjectProperty(None)
 
     def on_press(self, *args):
-        for a in self.entry:
-            w = App.get_running_app().manager.current_screen.ids
-            if hasattr(w, a):
-                getattr(w, a).text = self.entry.get(a)
+        App.get_running_app().manager.current_screen.expense.update(self.entry)
         self.popup.dismiss()
 
 
