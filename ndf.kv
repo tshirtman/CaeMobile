@@ -334,9 +334,8 @@ BoxLayout:
                     )
 
             Widget:
-            NormalButton:
-                text: 'Utiliser saisie précédente (%s)' % len(list(app.select_expenses(root.expense)))
-                on_press: Factory.SelectPrefilPopup(entries=list(app.select_expenses(root.expense))).open()
+            SelectPrefilButton:
+                expenses: list(app.select_expenses(root.expense))
 
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
@@ -451,9 +450,8 @@ BoxLayout:
                 on_text:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
             Widget
-            NormalButton:
-                text: 'Utiliser saisie précédente (%s)' % len(list(app.select_expenses(root.expense)))
-                on_press: Factory.SelectPrefilPopup(entries=list(app.select_expenses(root.expense))).open()
+            SelectPrefilButton:
+                expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
             FormTextInput:
@@ -579,9 +577,8 @@ BoxLayout:
                 on_text:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             Widget
-            NormalButton:
-                text: 'Utiliser saisie précédente (%s)' % len(list(app.select_expenses(root.expense)))
-                on_press: Factory.SelectPrefilPopup(entries=list(app.select_expenses(root.expense))).open()
+            SelectPrefilButton:
+                expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
             FormTextInput:
@@ -704,9 +701,8 @@ BoxLayout:
                 on_text:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
             Widget
-            NormalButton:
-                text: 'Utiliser saisie précédente (%s)' % len(list(app.select_expenses(root.expense)))
-                on_press: Factory.SelectPrefilPopup(entries=list(app.select_expenses(root.expense))).open()
+            SelectPrefilButton:
+                expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
             FormTextInput:
@@ -932,3 +928,8 @@ BoxLayout:
             size_hint_y: None
             height: self.minimum_height
 
+<SelectPrefilButton@NormalButton>:
+    expenses: []
+    text: 'Utiliser saisie précédente (%s)' % len(self.expenses)
+    on_press: Factory.SelectPrefilPopup(entries=self.expenses).open()
+    disabled: not len(self.expenses)
