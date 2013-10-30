@@ -18,6 +18,7 @@
 import urlparse
 import datetime
 
+
 def read_locale_date(value):
     """
         return a date object based on a string expected to be in the local
@@ -25,6 +26,7 @@ def read_locale_date(value):
     """
     day, month, year = map(int, value.split('-'))
     return datetime.date(year, month, day)
+
 
 def write_locale_date(date_obj):
     """
