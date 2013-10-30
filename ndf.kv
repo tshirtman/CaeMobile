@@ -911,6 +911,10 @@ BoxLayout:
     height: small_button_height
     text: '%s - %s' % (self.entry.get('description'), self.entry.get('ht')) if self.entry else ''
 
+    on_press:
+        app.manager.current_screen.expense.update(self.entry)
+        self.popup.dismiss()
+
 <SelectPrefilPopup>:
     size_hint: .8, .8
     title: 'Séléctionner une entrée précédente comme modèle'

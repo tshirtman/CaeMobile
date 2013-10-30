@@ -72,10 +72,6 @@ class PrefilEntry(Button):
     entry = ObjectProperty(None)
     popup = ObjectProperty(None)
 
-    def on_press(self, *args):
-        App.get_running_app().manager.current_screen.expense.update(self.entry)
-        self.popup.dismiss()
-
 
 class ExpensePool(list):
     """
