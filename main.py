@@ -532,6 +532,8 @@ class NdfApp(App):
             'start',
             'tva',
             'type_id',
+            'type',
+            'description',
             )
 
         for e in filter_expenses(expense, self.expenses.data, keys):
