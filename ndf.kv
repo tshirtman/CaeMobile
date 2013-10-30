@@ -414,6 +414,14 @@ BoxLayout:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'expenses'
 
+        NormalButton:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Reset'
+            on_press:
+                print "reset!"
+                root.expense = {'transport': 'True'}
+
         GridLayout:
             cols: 2
             Widget:
@@ -448,7 +456,10 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
+                    (
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    if self.text in self.values else None
+                    )
             Widget
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
@@ -541,6 +552,13 @@ BoxLayout:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'expenses'
 
+        NormalButton:
+            size_hint_y: None
+            height: small_button_height
+            text: 'Reset'
+            on_press:
+                root.expense = {'transport': 'False'}
+
         GridLayout:
             cols: 2
             Widget:
@@ -575,7 +593,10 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
+                    (
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    if self.text in self.values else None
+                    )
             Widget
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
@@ -699,7 +720,10 @@ BoxLayout:
                 size_hint_y: None
                 height: small_button_height
                 on_text:
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
+                    (
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    if self.text in self.values else None
+                    )
             Widget
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
