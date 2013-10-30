@@ -403,6 +403,9 @@ BoxLayout:
 
 
 <KmAddFormScreen>:
+    on_enter:
+        self.expense['transport'] = 'True'
+        print self.expense
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
@@ -528,6 +531,9 @@ BoxLayout:
                 id: colspan1
 
 <CommonAddFormScreen>:
+    on_enter:
+        self.expense['transport'] = 'False'
+        print self.expense
     BoxLayout:
         orientation: 'vertical'
         NormalButton:

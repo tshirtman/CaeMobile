@@ -534,6 +534,7 @@ class NdfApp(App):
             'type_id',
             'type',
             'description',
+            'transport',
             )
 
         for e in filter_expenses(expense, self.expenses.data, keys):
