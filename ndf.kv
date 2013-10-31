@@ -38,6 +38,7 @@ BoxLayout:
         MenuButton:
             source: "data/add.png"
             text: 'Ajouter'
+            disabled: not (app.settings and any(json.loads(app.settings.get('main', 'expensetypes')).values()))
             on_press:
                 screenmanager.transition.direction = 'left'
                 screenmanager.current = 'add'
