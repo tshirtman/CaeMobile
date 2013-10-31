@@ -92,6 +92,7 @@ BoxLayout:
         x: root.x + sp(2)
 
         Image:
+            color: (1, 1, 1, 1) if not root.disabled else (.4, .4, .4, 1)
             source: root.source
             size_hint_x: None
             width: self.texture_size[0]
