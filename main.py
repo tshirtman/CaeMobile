@@ -20,6 +20,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory
 from kivy.clock import Clock
+from kivy.uix.widget import Widget
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -71,6 +72,10 @@ class SelectPrefilPopup(Popup):
 class PrefilEntry(Button):
     entry = ObjectProperty(None)
     popup = ObjectProperty(None)
+
+
+class ExpenseDispatcher(Widget):
+    expense = DictProperty({})
 
 
 class ExpensePool(list):

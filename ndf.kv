@@ -358,20 +358,20 @@ BoxLayout:
             ExpenseFormTextInput:
                 id: end
                 attribute: 'end'
-                expense: root.exense
+                expense: root.expense
                 next_form: ht
 
             NormalLabel:
                 text: "Nombre de kilomètres"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: ht
                 attribute: 'km'
-                expense: root.exense
+                expense: root.expense
                 next_form: description
 
             NormalLabel:
                 text: "Description"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: description
                 attribute: 'description'
                 expense: root.expense
@@ -460,58 +460,50 @@ BoxLayout:
                     root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
                     if self.text in self.values else None
                     )
-            Widget
+            NormalLabel:
+                text: 'prefils'
+
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: date
+                attribute: 'date'
                 text: root.get_date()
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('date', args[0].text)
-                    start.focus = True
+                expense: root.expense
+                next_form: start
 
             NormalLabel:
                 text: "Point de départ"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: start
-                text: root.expense and root.expense.get('start') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('start', args[0].text)
-                    end.focus = True
+                attribute: 'start'
+                expense: root.expense
+                next_form: end
 
             NormalLabel:
                 text: "Point d'arrivée"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: end
-                text: root.expense and root.expense.get('end') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('end', args[0].text)
-                    ht.focus = True
+                attribute: 'end'
+                expense: root.expense
+                next_form: ht
 
             NormalLabel:
                 text: "Nombre de kilomètres"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: ht
-                text: root.expense and root.expense.get('km') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('km', args[0].text)
-                    description.focus = True
+                attribute: 'km'
+                expense: root.expense
+                next_form: description
 
             NormalLabel:
                 text: "Description"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: description
-                text: root.expense and root.expense.get('description') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('description', args[0].text)
-                    valid.focus = True
+                attribute: 'description'
+                expense: root.expense
 
             Widget:
             Widget:
@@ -600,45 +592,38 @@ BoxLayout:
             Widget
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
+
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: date
+                attribute: 'date'
                 text: root.get_date()
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('date', args[0].text)
-                    description.focus = True
+                expense: root.expense
+                next_form: description
 
             NormalLabel:
                 text: "Description"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: description
-                text: root.expense and root.expense.get('description') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('description', args[0].text)
-                    ht.focus = True
+                attribute: 'description'
+                expense: root.expense
+                next_form: ht
 
             NormalLabel:
                 text: "Montant HT"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: ht
-                text: root.expense and root.expense.get('ht') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('ht', args[0].text)
-                    tva.focus = True
+                attribute: 'ht'
+                expense: root.expense
+                next_form: tva
 
             NormalLabel:
                 text: "Montant de la TVA"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: tva
-                text: root.expense and root.expense.get('tva') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('tva', args[0].text)
-                    valid.focus = True
+                attribute: 'ht'
+                expense: root.expense
 
             Widget:
             Widget:
@@ -729,43 +714,35 @@ BoxLayout:
                 expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: date
+                attribute: 'date'
                 text: root.get_date()
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('date', args[0].text)
-                    description.focus = True
+                expense: root.expense
+                next_form: description
 
             NormalLabel:
                 text: "Description"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: description
-                text: root.expense and root.expense.get('description') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('description', args[0].text)
-                    ht.focus = True
+                attribute: 'description'
+                expense: root.expense
+                next_form: ht
 
             NormalLabel:
                 text: "Montant HT"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: ht
-                text: root.expense and root.expense.get('ht') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('ht', args[0].text)
-                    tva.focus = True
+                attribute: 'ht'
+                expense: root.expense
+                next_form: tva
 
             NormalLabel:
                 text: "Montant de la TVA"
-            FormTextInput:
+            ExpenseFormTextInput:
                 id: tva
-                text: root.expense and root.expense.get('tva') or ""
-                disabled: not (root.expense and root.expense.get('type'))
-                on_text_validate:
-                    root.set_value('tva', args[0].text)
-                    valid.focus = True
+                attribute: 'ht'
+                expense: root.expense
 
             Widget:
             Widget:
@@ -922,15 +899,14 @@ BoxLayout:
     active: app.settings and self.setting and app.settings.get('settings', self.setting) == 'True' or False
     on_active: app.settings.set('settings', self.setting, str(args[1]))
 
-<ExpenseFormTextInput@FormTextInput>:
+<ExpenseFormTextInput@ExpenseDispatcher+FormTextInput>:
     attribute: ''
-    expense: None
     next_form: None
-    text: root.expense and root.expense.get(attribute)
-    disabled: not (root.expense and root.expense.get('type'))
+    text: root.expense and root.expense.get(self.attribute) or u''
+    disabled: not (self.expense and self.expense.get('type'))
     on_text_validate:
-        root.set_value('date', args[0].text)
-        start.focus = True
+        app.manager.current_screen.set_value(self.attribute, self.text.decode('utf-8'))
+        if self.next_form: self.next_form.focus = True
 
 <PrefilEntry>:
     size_hint_y: None
