@@ -50,6 +50,13 @@ BoxLayout:
                 screenmanager.transition.direction = 'down'
                 screenmanager.current = 'settings'
 
+        MenuButton:
+            source: 'data/about.png'
+            text: "À propos"
+            on_press:
+                screenmanager.transition.direction = 'up'
+                screenmanager.current = 'about'
+
 
     ScreenManager:
         id: screenmanager
@@ -64,6 +71,9 @@ BoxLayout:
 
         SettingsScreen:
             name: 'settings'
+
+        AboutScreen:
+            name: 'about'
 
         KmAddFormScreen:
             name: 'kmaddform'
@@ -234,6 +244,46 @@ BoxLayout:
                 text: "Configurer"
                 on_press:
                     app.check_configuration()
+
+<AboutLabel@NormalLabel>:
+    height: self.texture_size[1]
+    font_size: '40sp'
+    size_hint_y: None
+
+<LinkLabel@AboutLabel>:
+    color: 0, 0, 1, 1
+    on_touch_down: app.open_mail_link(self.text) if self.collide_point(*args[1].pos) else None
+
+<AboutScreen@Screen>:
+    GridLayout:
+        cols: 1
+        #size_hint_y: None
+        #height: self.minimum_height
+        orientation: 'vertical'
+        Widget
+        AboutLabel:
+            text: 'Cette application a été réalisé pour'
+            font_size: '20sp'
+        AboutLabel:
+            text: 'Croissance Commune'
+        AboutLabel:
+            text: 'par'
+            font_size: '20sp'
+        AboutLabel:
+            text: 'Majerti'
+        AboutLabel:
+            text: 'et'
+            font_size: '20sp'
+        AboutLabel:
+            text: 'Gihux'
+        AboutLabel:
+            text: 'contacts'
+            font_size: '20sp'
+        LinkLabel:
+            text: 'contact@majerti.fr'
+        LinkLabel:
+            text: 'contact@gihux.com'
+        Widget
 
 <AddScreen@Screen>:
     BoxLayout:

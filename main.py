@@ -21,6 +21,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
+from kivy.utils import platform
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -37,12 +38,20 @@ from utils import (
     get_action_path_and_method,
     filter_expenses,
     )
+platform = platform()
 
 DEFAULTSETTINGSFILE = '.default_config.ini'
 SETTINGSFILE = 'config.ini'
 SETTINGS_FILES = DEFAULTSETTINGSFILE, SETTINGSFILE
 
 __version__ = '0.01'
+
+
+if platform == 'android':
+    from jnius import autoclass
+    Intent = autoclass('android.content.Intent')
+    PythonActivity = autoclass('org.renpy.android.PythonActivity')
+    Uri = autoclass('android.net.Uri')
 
 
 class SyncPopup(Popup):
@@ -544,6 +553,16 @@ class NdfApp(App):
 
         for e in filter_expenses(expense, self.expenses.data, keys):
             yield e
+
+    def open_mail_link(self, mail):
+        if platform == 'linux':
+            print "sending a mail to %s: not implemented on linux" % mail
+
+        elif platform == 'android':
+            intent = Intent(Intent.ACTION_SENDTO,
+                            Uri.parse('mailto:%s' % mail))
+            PythonActivity.mActivity.startActivity(
+                Intent.createChoser(intent, "Envoyer un mail à %s" % mail))
 
 
 class ExpenseFormScreen(Screen):
