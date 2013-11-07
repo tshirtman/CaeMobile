@@ -588,10 +588,11 @@ BoxLayout:
                 height: small_button_height
                 on_text:
                     (
-                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes'))
+                    root.set_value('type', args[0].text, json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes'))
                     if self.text in self.values else None
                     )
-            Widget
+            Label:
+                text: 'prefils'
             SelectPrefilButton:
                 expenses: list(app.select_expenses(root.expense))
 
