@@ -19,6 +19,9 @@ def get_answer(path, req_body, **kwargs):
     elif path.endswith('expenseoptions'):
         return mock_expenseoptions(req_body)
 
+    elif path.endswith('expenses'):
+        return mock_expenses(req_body, **kwargs)
+
     print path, req_body, kwargs
     return True, None, Mock()
 
@@ -37,9 +40,6 @@ def mock_login(body):
 
 
 def mock_expenseoptions(body):
-    print body
-
-    #import pudb; pudb.set_trace()
     return True, Mock(resp_status=200), {
         "status": "success",
         "result": {
@@ -58,3 +58,14 @@ def mock_expenseoptions(body):
                     "activit\u00e9 aupr\u00e8s de vos clients"}]
             }
         }
+
+
+def mock_expenses(body, **kwargs):
+    print body, kwargs
+
+    if kwargs.get('method') == 'POST':
+        return True, Mock(resp_status=200), {
+            "status": "success",
+            "result": {
+                }
+            }
