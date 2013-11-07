@@ -13,6 +13,8 @@ from kivy.logger import Logger
 from functools import partial
 from json import JSONDecoder, JSONEncoder
 
+import mock
+
 JSON_ENCODE = JSONEncoder().encode
 JSON_DECODE = JSONDecoder().raw_decode
 
@@ -104,6 +106,19 @@ class Connection(EventDispatcher):
         """
             Base method to send requests to server, autoconnect if needed
         """
+        if self.server.startswith('mock'):
+            success = kwargs.pop('on_success', None)
+            error = kwargs.pop('on_error', None)
+
+            answer, req, resp = mock.get_answer(path, req_body, **kwargs)
+            print success
+            if answer and success:
+                print "success"
+                success(req, resp)
+            elif not answer and error:
+                error(req, resp)
+            return
+
         base_url = self.base_url()
         if not self.cookie:
             Logger.info("Ndf: not logged in, authenticating")
@@ -156,6 +171,11 @@ class Connection(EventDispatcher):
         """
         url = self.base_url() + 'login'
         body = self._get_credentials()
+
+        print self.server, success, error
+        if self.server.startswith('mock'):
+            return self.request(url, body, on_success=success, on_error=error)
+
         self._get_request(url, body, success, error)
 
     def connection_error(self, request, error='Undefined error', *args):
