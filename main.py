@@ -5,6 +5,7 @@ import json
 import random
 import datetime
 import dateutil.parser
+import subprocess
 
 from functools import partial
 
@@ -556,13 +557,30 @@ class NdfApp(App):
 
     def open_mail_link(self, mail):
         if platform == 'linux':
-            print "sending a mail to %s: not implemented on linux" % mail
+            process = subprocess.Popen(["xdg-email", mail])
+            Logger.debug("Spawned external mailer process: PID %i", process.pid)
+            return
 
-        elif platform == 'android':
+        if platform == 'android':
             intent = Intent(Intent.ACTION_SENDTO,
                             Uri.parse('mailto:%s' % mail))
             PythonActivity.mActivity.startActivity(
                 Intent.createChoser(intent, "Envoyer un mail à %s" % mail))
+
+    def open_link(self, url):
+        if platform == 'linux':
+            process = subprocess.Popen(["xdg-open", url])
+            Logger.debug(
+                "Spawned external process: Url: %s - PID %i", 
+                url, process.pid)
+            return
+
+        if platform == 'android':
+            intent = Intent(Intent.ACTION_VIEW, Uri.parsr(url))
+            PythonActivity.mActivity.startActivity(
+                Intent.createChoser(intent, "Ouverture de l'url %s" % url))
+
+
 
 
 class ExpenseFormScreen(Screen):

@@ -254,6 +254,13 @@ BoxLayout:
     color: 0, 0, 1, 1
     on_touch_down: app.open_mail_link(self.text) if self.collide_point(*args[1].pos) else None
 
+<MailLabel@AboutLabel>:
+    on_touch_down: app.open_mail_link(self.mail) if self.collide_point(*args[1].pos) else None
+
+<WebLabel@AboutLabel>:
+    on_touch_down: app.open_link(self.url) if self.collide_point(*args[1].pos) else None
+
+
 <AboutScreen@Screen>:
     GridLayout:
         cols: 1
@@ -261,28 +268,45 @@ BoxLayout:
         #height: self.minimum_height
         orientation: 'vertical'
         Widget
-        AboutLabel:
-            text: 'Cette application a été réalisé pour'
+        WebLabel:
+            text: 'Get the code on [color=#0000FF]github[/color]!'
+            markup: True
+            url: "https://www.github.com/CroissanceCommune/ndf_autonomie"
             font_size: '20sp'
         AboutLabel:
-            text: 'Croissance Commune'
+            text: '_____________________________________________________'
+            font_size: '20sp'
+        WebLabel:
+            text: 'Une réalisation libre financée par [color=#0000FF]majerti.fr[/color]'
+            markup: True
+            font_size: '20sp'
+            url: 'https://majerti.fr'
         AboutLabel:
-            text: 'par'
+            text: '_____________________________________________________'
             font_size: '20sp'
         AboutLabel:
-            text: 'Majerti'
+            text: 'Développeurs:'
         AboutLabel:
-            text: 'et'
+            text: '[color=#FF0000]TODO: Mettre au fer à gauche et tabuler ce qui suit[/color]'
             font_size: '20sp'
-        AboutLabel:
-            text: 'Gihux'
-        AboutLabel:
-            text: 'contacts'
+            markup: True
+        MailLabel:
+            text: '- Gabriel Pettier - @gihux.com <image enveloppe>'
             font_size: '20sp'
-        LinkLabel:
-            text: 'contact@majerti.fr'
-        LinkLabel:
-            text: 'contact@gihux.com'
+            mail: 'contact@gihux.com'
+            markup: True
+        MailLabel:
+            text: '- Gaston Tjebbes - @majerti.fr <image enveloppe>'
+            mail: 'gaston.tjebbes@majerti.fr'
+            font_size: '20sp'
+        MailLabel:
+            text: '- Julien Miotte - @majerti.fr <image enveloppe>'
+            mail: 'julien.miotte@majerti.fr'
+            font_size: '20sp'
+        MailLabel:
+            text: '- Feth Arezki - @majerti.fr <image enveloppe>'
+            mail: 'feth.arezki@majerti.fr'
+            font_size: '20sp'
         Widget
 
 <AddScreen@Screen>:
