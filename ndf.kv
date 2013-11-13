@@ -254,8 +254,41 @@ BoxLayout:
     color: 0, 0, 1, 1
     on_touch_down: app.open_mail_link(self.text) if self.collide_point(*args[1].pos) else None
 
-<MailLabel@AboutLabel>:
+<MailLabel@GridLayout>:
+    rows: 1
+    size_hint: 1, None
+    height: self.minimum_height
+    name: ''
+    font_size: 0
+    mail: ''
+    icon: ''
+    markup: True
     on_touch_down: app.open_mail_link(self.mail) if self.collide_point(*args[1].pos) else None
+    AboutLabel:
+        text:  ' - ' + root.name
+        font_size: root.font_size
+        markup: root.markup
+        halign: 'left'
+        valign: 'middle'
+        text_size: self.size[0], None
+    AboutLabel:
+        text: root.mail
+        font_size: root.font_size
+        markup: root.markup
+        halign: 'center'
+        text_size: self.size[0], None
+    Image:
+        height: root.height
+        source: 'data/letter.png'
+        center_y: root.center_y
+        size_hint_x: None
+        width: '64sp'
+    Image:
+        height: root.height
+        source: root.icon
+        center_y: root.center_y
+        size_hint_x: None
+        width: '64sp'
 
 <WebLabel@AboutLabel>:
     on_touch_down: app.open_link(self.url) if self.collide_point(*args[1].pos) else None
@@ -291,22 +324,29 @@ BoxLayout:
             font_size: '20sp'
             markup: True
         MailLabel:
-            text: '- Gabriel Pettier - @gihux.com <image enveloppe>'
+            name: 'Gabriel Pettier'
             font_size: '20sp'
             mail: 'contact@gihux.com'
             markup: True
+            icon: 'data/gihux.png'
         MailLabel:
-            text: '- Gaston Tjebbes - @majerti.fr <image enveloppe>'
+            name: 'Gaston Tjebbes'
             mail: 'gaston.tjebbes@majerti.fr'
             font_size: '20sp'
+            markup: True
+            icon: 'data/majerti.png'
         MailLabel:
-            text: '- Julien Miotte - @majerti.fr <image enveloppe>'
+            name: 'Julien Miotte'
             mail: 'julien.miotte@majerti.fr'
             font_size: '20sp'
+            markup: True
+            icon: 'data/majerti.png'
         MailLabel:
-            text: '- Feth Arezki - @majerti.fr <image enveloppe>'
+            name: 'Feth Arezki'
             mail: 'feth.arezki@majerti.fr'
             font_size: '20sp'
+            markup: True
+            icon: 'data/majerti.png'
         Widget
 
 <AddScreen@Screen>:
