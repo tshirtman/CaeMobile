@@ -571,16 +571,14 @@ class NdfApp(App):
         if platform == 'linux':
             process = subprocess.Popen(["xdg-open", url])
             Logger.debug(
-                "Spawned external process: Url: %s - PID %i", 
+                "Spawned external process: Url: %s - PID %i",
                 url, process.pid)
             return
 
         if platform == 'android':
-            intent = Intent(Intent.ACTION_VIEW, Uri.parsr(url))
+            intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             PythonActivity.mActivity.startActivity(
                 Intent.createChoser(intent, "Ouverture de l'url %s" % url))
-
-
 
 
 class ExpenseFormScreen(Screen):
