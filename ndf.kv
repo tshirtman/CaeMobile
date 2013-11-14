@@ -11,6 +11,7 @@
 #:set text_color_dark 0, 0, 0, 1
 #:set button_color 26/255., 26/255., 26/255., 1
 #:set button_down_color 60/255., 60/255., 60/255., 1
+#:set button_selected_color 90/255., 90/255., 90/255., 1
 #:set background_dark 245/255., 245/255., 245/255., 1
 
 BoxLayout:
@@ -23,6 +24,7 @@ BoxLayout:
 
     orientation: 'vertical'
     BoxLayout:
+        id: menu
         size_hint_y: None
         height: '48sp'
 
@@ -39,6 +41,8 @@ BoxLayout:
             source: "data/add.png"
             text: 'Ajouter'
             disabled: not (app.settings and any(json.loads(app.settings.get('main', 'expensetypes')).values()))
+            state: 'down' if 'add' in screenmanager.current else 'normal'
+            destinations: ['add', 'kmaddform', 'commonaddform']
             on_press:
                 screenmanager.transition.direction = 'left'
                 screenmanager.current = 'add'
@@ -46,6 +50,7 @@ BoxLayout:
         MenuButton:
             source: 'data/settings.png'
             text: "Configuration"
+            destinations: ['settings', ]
             on_press:
                 screenmanager.transition.direction = 'down'
                 screenmanager.current = 'settings'
@@ -53,6 +58,7 @@ BoxLayout:
         MenuButton:
             source: 'data/about.png'
             text: "À propos"
+            destinations: ['about', ]
             on_press:
                 screenmanager.transition.direction = 'up'
                 screenmanager.current = 'about'
@@ -62,6 +68,10 @@ BoxLayout:
         id: screenmanager
         opacity: 0.9
         transition: SlideTransition()
+        on_current:
+            #print self.current
+            [x.setter('selected')(x, self.current in x.destinations) for x in menu.children if hasattr(x, 'destinations')]
+            #print [(x.text, hasattr(x, 'destinations') and x.destinations, hasattr(x, 'destinations') and self.current in x.destinations, x.selected, '\n') for x in menu.children]
 
         ExpenseListScreen:
             name: 'expenses'
@@ -83,15 +93,19 @@ BoxLayout:
 
 
 <-MenuButton@Button>:
+    selected: False
     source: ''
     text: ''
 
     on_state: print self.state == 'down'
+    on_selected: print "selected %s" % self.selected
 
     BoxLayout:
         canvas:
             Color:
-                rgba: button_down_color if root.state == 'down' else button_color
+                rgba:
+                    button_selected_color if root.selected else (
+                    button_down_color if root.state == 'down' else button_color)
 
             Rectangle:
                 pos: root.pos
