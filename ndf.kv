@@ -29,19 +29,18 @@ BoxLayout:
         height: '48sp'
 
         MenuButton:
-            source: 'data/sync.png'
-            # XXX find a nice way to update this in UI
-#            text: 'sync (%s)' % (app.settings and len(app.settings.items('tosync')) or 0)
-            text: 'sync (%s)' % (app.pool and len(app.pool.tosync()) or 0)
-            on_press: app.sync_datas()
-            disabled: not app.pool or not len(app.pool.tosync())
+            source: 'data/notes.png'
+            text: 'Notes (%s)' % (app.pool and len(app.pool) or 0)
+            destinations: ['expenses', ]
+            on_press:
+                screenmanager.transition.direction = 'right'
+                screenmanager.current = 'expenses'
 
 
         MenuButton:
             source: "data/add.png"
             text: 'Ajouter'
             disabled: not (app.settings and any(json.loads(app.settings.get('main', 'expensetypes')).values()))
-            state: 'down' if 'add' in screenmanager.current else 'normal'
             destinations: ['add', 'kmaddform', 'commonaddform']
             on_press:
                 screenmanager.transition.direction = 'left'
@@ -56,6 +55,7 @@ BoxLayout:
                 screenmanager.current = 'settings'
 
         MenuButton:
+            source: 'data/about.png'
             source: 'data/about.png'
             text: "À propos"
             destinations: ['about', ]
@@ -203,12 +203,6 @@ BoxLayout:
 <SettingsScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
-        NormalButton:
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'up'
-                root.manager.current = 'expenses'
 
         BoxLayout:
             orientation: 'vertical'
@@ -394,46 +388,27 @@ BoxLayout:
         Widget
 
 <AddScreen@Screen>:
-    BoxLayout:
+    GridLayout:
+        cols: 1 if self.width < self.height else 2
+        spacing: '100sp'
+        padding: '100sp'
         orientation: 'vertical'
-        NormalButton:
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'expenses'
-        Widget:
-            size_hint_y: None
-            height: small_button_height
 
         NormalButton:
-            height: '60dp'
             text: 'Frais divers'
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'commonaddform'
-        Widget:
-            size_hint_y: None
 
         NormalButton:
-            height: '60dp'
             text: 'Frais kilométriques'
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'kmaddform'
 
-        Widget:
-
 <KmEditFormScreen>:
     BoxLayout:
         orientation: 'vertical'
-        NormalButton:
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'expenses'
-
         NormalButton:
             size_hint_y: None
             height: small_button_height
@@ -568,13 +543,6 @@ BoxLayout:
     BoxLayout:
         orientation: 'vertical'
         NormalButton:
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'expenses'
-
-        NormalButton:
             size_hint_y: None
             height: small_button_height
             text: 'Reset'
@@ -697,12 +665,6 @@ BoxLayout:
         print self.expense
     BoxLayout:
         orientation: 'vertical'
-        NormalButton:
-            height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'expenses'
 
         NormalButton:
             size_hint_y: None
@@ -818,14 +780,6 @@ BoxLayout:
         NormalButton:
             size_hint_y: None
             height: small_button_height
-            text: 'Retour'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'expenses'
-
-        NormalButton:
-            size_hint_y: None
-            height: small_button_height
             text: 'Supprimer'
             on_press:
                 app.delete_expense(root.expense)
@@ -932,6 +886,42 @@ BoxLayout:
 <ExpenseListScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
+        GridLayout:
+            rows: 1
+            padding: 10
+            size_hint_y: None
+            height: self.minimum_height
+            Button:
+                id: btn
+                size_hint: 1, None
+                height: '48sp'
+                on_press: app.sync_datas()
+                disabled: not app.pool or not len(app.pool.tosync())
+                #background_color: 1, 1, 1, 1
+                background_down: ''
+                background_disabled_down: ''
+                background_normal: ''
+                disabled_image: ''
+
+                FloatLayout:
+                    pos: btn.pos
+                    size: btn.size
+                    Image:
+                        center: self.parent.center
+                        source: 'data/sync.png' if app.pool and len(app.pool.tosync()) else ''
+                        width: self.texture_size[0]
+                        size_hint_x: None
+
+                    Label:
+                        color: text_color_dark
+                        #size: self.texture_size
+                        #size_hint: 1, None
+                        #center_x: self.parent.center_x
+                        pos: self.parent.pos
+                        text_size: None, None
+                        halign: 'center'
+                        text: '%s' % (app.pool and len(app.pool.tosync()) or '')
+
         ListView:
             adapter: ListAdapter(data=root.data, cls=Factory.ExpenseListItem, args_converter=root.args_converter)
 
