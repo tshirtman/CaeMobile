@@ -902,13 +902,14 @@ BoxLayout:
                 background_disabled_down: ''
                 background_normal: ''
                 disabled_image: ''
+                opacity: 0 if self.disabled else 1
 
                 FloatLayout:
                     pos: btn.pos
                     size: btn.size
                     Image:
                         center: self.parent.center
-                        source: 'data/sync.png' if app.pool and len(app.pool.tosync()) else ''
+                        source: 'data/sync.png'
                         width: self.texture_size[0]
                         size_hint_x: None
 
