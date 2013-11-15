@@ -10,5 +10,28 @@ install buildozer:
 
 http://github.com/kivy/buildozer
 
+debug version
++++++++++++++
+
 buildozer android debug deploy run logcat
 
+release version
++++++++++++++++
+
+file needed majerti-release-key.keystore
+
+build the unsigned, unaligned apk
+
+	buildozer android release
+
+use jarsigner to sign it
+
+	jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore majerti-release-key.keystore bin/CaeMobile-0.01-release-unsigned.apk majerti
+	mv bin/CaeMobile-0.01-release-{un,}signed.apk
+
+assure yourself zipalign from the sdk is in the path, and zipalign the apk
+
+	export PATH=$PATH:~/.buildozer/android/platform/android-sdk-21/tools
+	zipalign -v 4 bin/CaeMobile-0.01-release-signed.apk bin/CaeMobile-0.01-release-signed-aligned.apk
+
+the apk can be sent to google play using https://play.google.com/apps/publish/

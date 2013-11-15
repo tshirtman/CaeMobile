@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = Notes de frais
+title = Cae Mobile
 
 # (str) Package name
-package.name = ndfAutonomie
+package.name = caemobile
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = fr.majerti
+package.domain = majerteam
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -29,13 +29,13 @@ version.filename = %(source.dir)s/main.py
 requirements = openssl,pyopenssl,kivy,python-dateutil
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = %(source.dir)s/data/logo.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/data/icon.svg
+icon.filename = %(source.dir)s/data/logo.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = portrait
+orientation = all
 
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
@@ -99,4 +99,4 @@ android.permissions = INTERNET
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
