@@ -16,7 +16,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ini
 
 # (list) Source files to exclude (let empty to not excluding anything)
-#source.exclude_exts = spec
+source.exclude_exts = spec,config.ini
 
 # (str) Application versionning (method 1)
 version.regex = __version__ = '(.*)'

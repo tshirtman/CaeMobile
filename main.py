@@ -41,7 +41,7 @@ from utils import (
     )
 platform = platform()
 
-DEFAULTSETTINGSFILE = '.default_config.ini'
+DEFAULTSETTINGSFILE = 'default_config.ini'
 SETTINGSFILE = 'config.ini'
 SETTINGS_FILES = DEFAULTSETTINGSFILE, SETTINGSFILE
 
