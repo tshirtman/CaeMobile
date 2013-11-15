@@ -52,6 +52,7 @@ if platform == 'android':
     from jnius import autoclass
     Intent = autoclass('android.content.Intent')
     PythonActivity = autoclass('org.renpy.android.PythonActivity')
+    String = autoclass('java.lang.String')
     Uri = autoclass('android.net.Uri')
 
 
@@ -565,7 +566,8 @@ class NdfApp(App):
             intent = Intent(Intent.ACTION_SENDTO,
                             Uri.parse('mailto:%s' % mail))
             PythonActivity.mActivity.startActivity(
-                Intent.createChoser(intent, "Envoyer un mail à %s" % mail))
+                Intent.createChooser(
+                    intent, String("Envoyer un mail à %s" % mail)))
 
     def open_link(self, url):
         if platform == 'linux':
@@ -578,7 +580,8 @@ class NdfApp(App):
         if platform == 'android':
             intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             PythonActivity.mActivity.startActivity(
-                Intent.createChoser(intent, "Ouverture de l'url %s" % url))
+                Intent.createChooser(
+                    intent, String("Ouverture de l'url %s" % url)))
 
 
 class ExpenseFormScreen(Screen):
