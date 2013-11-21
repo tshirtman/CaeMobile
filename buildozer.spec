@@ -4,7 +4,7 @@
 title = Cae Mobile
 
 # (str) Package name
-package.name = caemobile
+package.name = cae_mobile
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = majerteam
@@ -16,7 +16,9 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ini
 
 # (list) Source files to exclude (let empty to not excluding anything)
-source.exclude_exts = spec,config.ini
+source.exclude_exts = spec
+source.exclude_dirs = captures
+source.exclude_patterns = config.ini,key_password
 
 # (str) Application versionning (method 1)
 version.regex = __version__ = '(.*)'
