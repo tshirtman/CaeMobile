@@ -88,6 +88,7 @@ class Connection(EventDispatcher):
             req_headers=headers,
             on_success=on_success,
             on_error=on_error,
+            on_failure=on_error,
             on_progress=on_progress,
             **kwargs)
 
