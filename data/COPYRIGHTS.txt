@@ -64,7 +64,7 @@ files: add.png settings.png valid_16.png valid.png
 delete_16.png #XXX
 edit_16.png #XXX
 
-gihux.png #XXX
+files: gihux.png
     Copyright: Gihux.com
     License: CC-BY-ND
 
@@ -84,10 +84,10 @@ files: notes.png
      On Debian systems, the complete text of the GNU Lesser General Public
      License can be found in /usr/share/common-licenses/LGPL-2.1 file.
 
-rounded-border.png #XXX
+rounded-border.png
     Copyright: 2013 Gabriel Pettier
     License: CC0
 
-sync_16.png #XXX
-sync.png #XXX
-sync.svg #XXX
+files: sync_16.png sync.png sync.svg
+    Copyright: Public Domain
+    source: openclipart.org http://openclipart.org/detail/74173/synchronize--by-aguest

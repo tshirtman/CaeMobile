@@ -4,10 +4,10 @@
 title = Cae Mobile
 
 # (str) Package name
-package.name = cae_mobile
+package.name = mobile
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = majerteam
+package.domain = majerteam.cae
 
 # (str) Source code where the main.py live
 source.dir = .
