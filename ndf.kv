@@ -582,7 +582,7 @@ BoxLayout:
                 height: small_button_height
             NormalSpinner:
                 text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
-                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes')] or []
+                values: app.settings and [opt['label'] for opt in json.loads(app.settings.get('main', 'expensetypes')).get('kmtypes')] or []
                 size_hint_y: None
                 height: small_button_height
                 on_text:
@@ -705,7 +705,7 @@ BoxLayout:
                 height: small_button_height
             NormalSpinner:
                 text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
-                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
+                values: app.settings and [opt['label'] for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
                 size_hint_y: None
                 height: small_button_height
                 on_text:
@@ -818,7 +818,7 @@ BoxLayout:
                 height: small_button_height
             NormalSpinner:
                 text: root.expense and root.expense.get('type') or u'S\xe9lectionner'
-                values: app.settings and [opt['label'].decode('utf-8') for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
+                values: app.settings and [opt['label'] for opt in json.loads(app.settings.get('main', 'expensetypes')).get('expensetypes')] or []
                 size_hint_y: None
                 height: small_button_height
                 on_text:
