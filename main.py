@@ -329,6 +329,12 @@ class NdfApp(App):
             self.check_auth_redirect(request, resp)
         elif rest_req.success:
             Logger.info("Ndf : Authentication test succeeded")
+            server = self.settings.get('settings', 'server')
+            servers = self.settings.get('settings', 'servers')
+            if server not in servers:
+                self.settings.set('settings', 'servers',
+                                  '%s, %s' % (servers, server))
+
             self.fetch_options()
         else:
             Logger.info("Ndf : Authentication test failed")
