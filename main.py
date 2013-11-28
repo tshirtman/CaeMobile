@@ -40,6 +40,7 @@ from kivy.clock import Clock
 from kivy.uix.widget import Widget
 from kivy.uix.dropdown import DropDown
 from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
 from kivy.utils import platform
 from kivy.properties import (
     BooleanProperty,
@@ -124,13 +125,33 @@ class CompleteTextInput(TextInput):
         if self.focus:
             self.dd.clear_widgets()
             for x in app.settings.get('settings', 'servers').split(','):
-                if self.text in x:
-                    b = Factory.DDButton(text=x)
+                url = x.split(';')[1].strip()
+                if self.text in url:
+                    b = Factory.DDButton(text=url)
                     b.bind(on_release=lambda btn: self.dd.select(btn.text))
                     self.dd.add_widget(b)
             self.dd.open(self)
         else:
             self.dd.dismiss()
+
+
+class ServerListItem(Button):
+    servername = StringProperty('')
+    serverurl = StringProperty('')
+
+
+class ServerList(GridLayout):
+    items = ListProperty([])
+    target = ObjectProperty(None)
+
+    def on_items(self, *args):
+        print "items!", self.items
+        self.clear_widgets()
+        for x in self.items:
+            name, url = x.strip().split(';')
+            b = ServerListItem(servername=name, serverurl=url)
+            self.add_widget(b)
+            print x, b.servername, b.serverurl
 
 
 class ExpensePool(list):

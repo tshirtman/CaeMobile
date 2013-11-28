@@ -200,6 +200,19 @@ BoxLayout:
         color: root.color
         text: root.text
 
+<ServerList>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+    items: app.settings and app.settings.get('settings', 'servers').split(',') or []
+
+
+<ServerListItem>:
+    size_hint_y: None
+    height: small_button_height
+    on_release: root.parent.target.text = root.serverurl
+    text: root.servername
+
 <SettingsScreen@Screen>:
     BoxLayout:
         orientation: 'vertical'
@@ -215,10 +228,28 @@ BoxLayout:
                     text: 'Serveur'
                     size_hint_y: None
                     height: small_button_height
-                CompleteSettingFormTextInput:
-                    id: server
-                    setting: 'server'
-                    next_form: login
+                BoxLayout:
+                    orientation: 'vertical'
+                    ScrollView:
+                        size_hint_y: None
+                        height: '200sp'
+                        ServerList:
+                            id: servers
+                            target: server
+
+                    NormalButton:
+                        text: 'Url personnalisée'
+                        size_hint_y: None
+                        height: small_button_height
+                        on_release:
+                            server.disabled = False
+                            server.focus = True
+
+                    CompleteSettingFormTextInput:
+                        id: server
+                        disabled: True
+                        setting: 'server'
+                        next_form: login
 
                 NormalLabel:
                     text: 'login'
