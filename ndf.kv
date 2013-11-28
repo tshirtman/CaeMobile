@@ -210,8 +210,10 @@ BoxLayout:
 <ServerListItem>:
     size_hint_y: None
     height: small_button_height
-    on_release: root.parent.target.text = root.serverurl
-    text: root.servername
+    on_release:
+        root.parent.target.text = root.serverurl
+        app.settings.set('settings', 'server', self.serverurl)
+    text: self.servername
 
 <SettingsScreen@Screen>:
     BoxLayout:
