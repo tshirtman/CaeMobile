@@ -215,7 +215,8 @@ BoxLayout:
                     text: 'Serveur'
                     size_hint_y: None
                     height: small_button_height
-                SettingFormTextInput:
+                CompleteSettingFormTextInput:
+                    id: server
                     setting: 'server'
                     next_form: login
 
@@ -250,6 +251,7 @@ BoxLayout:
             NormalButton:
                 height: small_button_height
                 text: "Configurer"
+                disabled: '' in (login.text, password.text, server.text)
                 on_press:
                     app.check_configuration()
 
