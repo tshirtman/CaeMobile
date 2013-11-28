@@ -115,9 +115,7 @@ class CompleteTextInput(TextInput):
     def __init__(self, **kwargs):
         super(CompleteTextInput, self).__init__(**kwargs)
         self.dd = DropDown(auto_dismiss=False)
-        self.dd.bind(on_select=self.setter('text'), )
-                     #on_dismiss=
-                     #lambda *x: self.dd.open(self) if self.focus else True)
+        self.dd.bind(on_select=self.setter('text'))
         self.bind(text=self.update_complete,
                   focus=self.update_complete)
 
@@ -630,7 +628,8 @@ class NdfApp(App):
     def open_mail_link(self, mail):
         if platform == 'linux':
             process = subprocess.Popen(["xdg-email", mail])
-            Logger.debug("Spawned external mailer process: PID %i", process.pid)
+            Logger.debug(
+                "Spawned external mailer process: PID %i", process.pid)
             return
 
         if platform == 'android':
