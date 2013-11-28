@@ -1022,6 +1022,10 @@ BoxLayout:
                     size_hint_y: None
                     height: self.texture_size[1] + 2 * self.line_height
 
+<DDButton@Button>:
+    size_hint_y: None
+    height: self.texture_size[1] + 5
+
 <NormalPopup@Popup>:
     size_hint: .8, .8
     title_color: text_color_dark
@@ -1043,6 +1047,8 @@ BoxLayout:
     on_text_validate:
         app.settings.set('settings', self.setting, args[0].text)
         if self.next_form: self.next_form.focus = True
+
+<CompleteSettingFormTextInput@SettingFormTextInput+CompleteTextInput>:
 
 <SettingSwitch@Switch>:
     setting: ''

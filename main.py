@@ -38,6 +38,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
+from kivy.uix.dropdown import DropDown
+from kivy.uix.textinput import TextInput
 from kivy.utils import platform
 from kivy.properties import (
     BooleanProperty,
@@ -103,6 +105,32 @@ class PrefilEntry(Button):
 
 class ExpenseDispatcher(Widget):
     expense = DictProperty({})
+
+
+class CompleteTextInput(TextInput):
+    options = ListProperty([])
+    dd = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(CompleteTextInput, self).__init__(**kwargs)
+        self.dd = DropDown(auto_dismiss=False)
+        self.dd.bind(on_select=self.setter('text'), )
+                     #on_dismiss=
+                     #lambda *x: self.dd.open(self) if self.focus else True)
+        self.bind(text=self.update_complete,
+                  focus=self.update_complete)
+
+    def update_complete(self, *args):
+        if self.focus:
+            self.dd.clear_widgets()
+            for x in app.settings.get('settings', 'servers').split(','):
+                if self.text in x:
+                    b = Factory.DDButton(text=x)
+                    b.bind(on_release=lambda btn: self.dd.select(btn.text))
+                    self.dd.add_widget(b)
+            self.dd.open(self)
+        else:
+            self.dd.dismiss()
 
 
 class ExpensePool(list):
@@ -691,4 +719,5 @@ class ExpenseListScreen(Screen):
 
 
 if __name__ == '__main__':
-    NdfApp().run()
+    app = NdfApp()
+    app.run()
