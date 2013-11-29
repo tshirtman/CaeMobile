@@ -206,14 +206,51 @@ BoxLayout:
     height: self.minimum_height
     items: app.settings and app.settings.get('settings', 'servers').split(',') or []
 
-
 <ServerListItem>:
     size_hint_y: None
     height: small_button_height
     on_release:
         root.parent.target.text = root.serverurl
         app.settings.set('settings', 'server', self.serverurl)
+        self.parent.popup.dismiss()
+
     text: self.servername
+
+<ServerListPopup@Popup>:
+    title: 'Choisissez votre Cae'
+
+    TabbedPanel:
+        do_default_tab: False
+        TabbedPanelItem:
+            text: 'Connus'
+            BoxLayout:
+                orientation: 'vertical'
+                ScrollView:
+                    ServerList:
+                        size_hint_y: None
+                        id: servers
+                        target: server
+                        popup: root
+
+        TabbedPanelItem:
+            text: 'Personnalisé'
+            BoxLayout:
+                orientation: 'vertical'
+                CompleteSettingFormTextInput:
+                    id: server
+                    setting: 'server'
+                Widget
+                BoxLayout:
+                    Widget
+                    Button:
+                        size_hint: None, None
+                        height: small_button_height
+                        width: self.texture_size[0] + 30
+                        text: 'Valider'
+                        on_press: root.dismiss()
+                    Widget
+                Widget
+
 
 <SettingsScreen@Screen>:
     BoxLayout:
@@ -230,28 +267,22 @@ BoxLayout:
                     text: 'Serveur'
                     size_hint_y: None
                     height: small_button_height
-                BoxLayout:
-                    orientation: 'vertical'
-                    ScrollView:
-                        size_hint_y: None
-                        height: '200sp'
-                        ServerList:
-                            id: servers
-                            target: server
 
-                    NormalButton:
-                        text: 'Url personnalisée'
-                        size_hint_y: None
-                        height: small_button_height
-                        on_release:
-                            server.disabled = False
-                            server.focus = True
-
-                    CompleteSettingFormTextInput:
-                        id: server
-                        disabled: True
-                        setting: 'server'
-                        next_form: login
+                NormalButton:
+                    id: server
+                    height: small_button_height
+                    text:
+                        (
+                        app.settings
+                        and app.settings.get('settings', 'server')
+                        or 'Sélectionnez votre Cae'
+                        )
+                    on_release:
+                        p = Factory.ServerListPopup(settings=self)
+                        p.bind(on_dismiss=lambda *x:
+                        self.setter('text')(self, app.settings.get('settings', 'server'))
+                        )
+                        p.open()
 
                 NormalLabel:
                     text: 'login'
@@ -284,7 +315,11 @@ BoxLayout:
             NormalButton:
                 height: small_button_height
                 text: "Configurer"
-                disabled: '' in (login.text, password.text, server.text)
+                disabled:
+                    '' in (
+                    password.text, login.text, server.text
+                    ) or 'Sélectionnez' in server.text
+
                 on_press:
                     app.check_configuration()
 
@@ -1091,7 +1126,6 @@ BoxLayout:
     separator_color: backround_color
     background: 'data/rounded-border.png'
     border: 4, 4, 4, 4
-
 
 <FormTextInput@TextInput>:
     multiline: False

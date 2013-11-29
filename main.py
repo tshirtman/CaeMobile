@@ -142,6 +142,7 @@ class ServerListItem(Button):
 class ServerList(GridLayout):
     items = ListProperty([])
     target = ObjectProperty(None)
+    popup = ObjectProperty(None)
 
     def on_items(self, *args):
         print "items!", self.items
@@ -150,7 +151,6 @@ class ServerList(GridLayout):
             name, url = x.strip().split(';')
             b = ServerListItem(servername=name, serverurl=url)
             self.add_widget(b)
-            print x, b.servername, b.serverurl
 
 
 class ExpensePool(list):
