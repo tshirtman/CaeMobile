@@ -106,6 +106,7 @@ class PrefilEntry(Button):
 
 class ExpenseDispatcher(Widget):
     expense = DictProperty({})
+    screen = ObjectProperty(None)
 
 
 class CompleteTextInput(TextInput):
