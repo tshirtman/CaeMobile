@@ -57,8 +57,8 @@ class Connection(EventDispatcher):
         else:
             self.connection_error(
                 request,
-                error='Erreur de connection, merci de vérifier vos'
-                      'identifiants\n')
+                'Erreur de connection, merci de vérifier vos'
+                'identifiants\n')
 
     def base_url(self):
         """
@@ -154,9 +154,9 @@ class Connection(EventDispatcher):
                 )
             on_error = partial(
                 self.connection_error,
-                error=r"Impossible de contacter le serveur renseigné "
-                      r"dans la configuration, veuillez vérifier "
-                      r"que l'adresse est correcte.")
+                r"Impossible de contacter le serveur renseigné "
+                r"dans la configuration, veuillez vérifier "
+                r"que l'adresse est correcte.")
 
             self._get_request(
                 base_url + 'login',

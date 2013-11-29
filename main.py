@@ -500,6 +500,7 @@ class NdfApp(App):
             if expense['todo'] == 'delete':
                 self.pool.remove(expense)
                 self.pool_updated()
+                return
             else:
                 # This expense is not know on the server side, we pop its id to
                 # be able to simply add it next time
