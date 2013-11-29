@@ -509,7 +509,7 @@ BoxLayout:
 
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            ExpenseFormTextInput:
+            ExpenseFormDateInput:
                 id: date
                 screen: root
                 text: root.get_date()
@@ -637,7 +637,7 @@ BoxLayout:
                 expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            ExpenseFormTextInput:
+            ExpenseFormDateInput:
                 id: date
                 screen: root
                 attribute: 'date'
@@ -767,7 +767,7 @@ BoxLayout:
 
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            ExpenseFormTextInput:
+            ExpenseFormDateInput:
                 id: date
                 screen: root
                 attribute: 'date'
@@ -884,7 +884,7 @@ BoxLayout:
                 expenses: list(app.select_expenses(root.expense))
             NormalLabel:
                 text: "Date (jj-mm-AAAA)"
-            ExpenseFormTextInput:
+            ExpenseFormDateInput:
                 id: date
                 screen: root
                 attribute: 'date'
@@ -1116,14 +1116,22 @@ BoxLayout:
     active: app.settings and self.setting and app.settings.get('settings', self.setting) == 'True' or False
     on_active: app.settings.set('settings', self.setting, str(args[1]))
 
-<ExpenseFormTextInput@ExpenseDispatcher+FormTextInput>:
+<ExpenseFormInput@ExpenseDispatcher+FormTextInput>:
     attribute: ''
     next_form: None
-    text: self.expense and self.expense.get(self.attribute) or u''
     disabled: not (self.expense and self.expense.get('type'))
     on_text_validate:
         self.screen.set_value(self.attribute, self.text.decode('utf-8'))
         if self.next_form: self.next_form.focus = True
+
+<ExpenseFormDateInput@ExpenseFormInput>:
+    text: self.expense and self.screen.get_date() or u''
+    on_text:
+        print "stored ",  self.expense.get('date')
+        print "displayed ", self.text
+
+<ExpenseFormTextInput@ExpenseFormInput>:
+    text: self.expense and self.expense.get(self.attribute) or u''
 
 <PrefilEntry>:
     size_hint_y: None
